@@ -218,7 +218,7 @@
 import Vue from "vue";
 import { Pokemon, GuessRecord, MatchType } from "./data";
 import { getRandomPokemon, searchPokemonByName, pokemonDatabase } from "./server";
-
+import service from "@/api/index";
 export default Vue.extend({
   data() {
     return {
@@ -234,9 +234,15 @@ export default Vue.extend({
     };
   },
   async onLoad() {
+    this.queryCards();
+
     this.initGame();
   },
   methods: {
+    async queryCards() {
+      const input = 'Amano-Iwato'
+      const res = await service.getCards(input);
+    },
     initGame() {
       this.answer = getRandomPokemon();
       this.guessRecords = [];
