@@ -1,0 +1,148 @@
+import { Pokemon } from "./data";
+
+// 宝可梦数据库
+export const pokemonDatabase: Pokemon[] = [
+  {
+    id: 1,
+    name: "车轮球",
+    generation: "G5",
+    types: ["虫", "毒"],
+    abilities: ["毒刺", "虫之预感", "加速"],
+    evolutionStage: 1,
+    evolutionLevel: "等级22以上",
+    bodyShape: "球形",
+    color: "灰色",
+    eggGroups: ["虫"],
+    baseStats: 360,
+  },
+  {
+    id: 2,
+    name: "烈咬陆鲨",
+    generation: "G4",
+    types: ["龙", "地面"],
+    abilities: ["沙隐", "粗糙皮肤"],
+    evolutionStage: 2,
+    evolutionLevel: "等级48以上",
+    bodyShape: "双足兽形",
+    color: "蓝色",
+    eggGroups: ["怪兽", "龙"],
+    baseStats: 600,
+  },
+  {
+    id: 3,
+    name: "皮卡丘",
+    generation: "G1",
+    types: ["电"],
+    abilities: ["静电", "避雷针"],
+    evolutionStage: 1,
+    evolutionLevel: "雷之石",
+    bodyShape: "四足兽形",
+    color: "黄色",
+    eggGroups: ["陆上", "妖精"],
+    baseStats: 320,
+  },
+  {
+    id: 4,
+    name: "喷火龙",
+    generation: "G1",
+    types: ["火", "飞行"],
+    abilities: ["猛火", "太阳之力"],
+    evolutionStage: 2,
+    evolutionLevel: "等级36以上",
+    bodyShape: "双足兽形",
+    color: "红色",
+    eggGroups: ["怪兽", "龙"],
+    baseStats: 534,
+  },
+  {
+    id: 5,
+    name: "水箭龟",
+    generation: "G1",
+    types: ["水"],
+    abilities: ["激流", "雨盘"],
+    evolutionStage: 2,
+    evolutionLevel: "等级36以上",
+    bodyShape: "双足兽形",
+    color: "蓝色",
+    eggGroups: ["怪兽", "水中1"],
+    baseStats: 530,
+  },
+  {
+    id: 6,
+    name: "妙蛙花",
+    generation: "G1",
+    types: ["草", "毒"],
+    abilities: ["茂盛", "叶绿素"],
+    evolutionStage: 2,
+    evolutionLevel: "等级32以上",
+    bodyShape: "四足兽形",
+    color: "绿色",
+    eggGroups: ["怪兽", "植物"],
+    baseStats: 525,
+  },
+  {
+    id: 7,
+    name: "路卡利欧",
+    generation: "G4",
+    types: ["格斗", "钢"],
+    abilities: ["精神力", "不屈之心", "正义之心"],
+    evolutionStage: 1,
+    evolutionLevel: "亲密度进化",
+    bodyShape: "双足兽形",
+    color: "蓝色",
+    eggGroups: ["陆上", "人型"],
+    baseStats: 525,
+  },
+  {
+    id: 8,
+    name: "班基拉斯",
+    generation: "G2",
+    types: ["岩石", "恶"],
+    abilities: ["扬沙", "紧张感"],
+    evolutionStage: 2,
+    evolutionLevel: "等级55以上",
+    bodyShape: "双足兽形",
+    color: "绿色",
+    eggGroups: ["怪兽"],
+    baseStats: 600,
+  },
+  {
+    id: 9,
+    name: "巨金怪",
+    generation: "G3",
+    types: ["钢", "超能力"],
+    abilities: ["恒净之躯", "轻金属"],
+    evolutionStage: 2,
+    evolutionLevel: "等级45以上",
+    bodyShape: "多足",
+    color: "蓝色",
+    eggGroups: ["矿物"],
+    baseStats: 600,
+  },
+  {
+    id: 10,
+    name: "快龙",
+    generation: "G1",
+    types: ["龙", "飞行"],
+    abilities: ["精神力", "多重鳞片"],
+    evolutionStage: 2,
+    evolutionLevel: "等级55以上",
+    bodyShape: "双足尾巴",
+    color: "黄色",
+    eggGroups: ["水中1", "龙"],
+    baseStats: 600,
+  },
+];
+
+// 随机获取一个宝可梦作为答案
+export const getRandomPokemon = (): Pokemon => {
+  const randomIndex = Math.floor(Math.random() * pokemonDatabase.length);
+  return pokemonDatabase[randomIndex];
+};
+
+// 根据名称搜索宝可梦
+export const searchPokemonByName = (name: string): Pokemon | undefined => {
+  return pokemonDatabase.find(
+    (p) => p.name.toLowerCase() === name.toLowerCase()
+  );
+};

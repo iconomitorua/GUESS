@@ -1,0 +1,86 @@
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+    }
+  },
+  "condition": {
+    "current": 0,
+    "list": []
+  },
+  "tabBar": {
+    "custom": false,
+    "position": "top",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "猜谜",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-select.png"
+      },
+      {
+        "pagePath": "pages/main/index",
+        "text": "图片猜谜",
+        "iconPath": "static/tabbar/fenlei.png",
+        "selectedIconPath": "static/tabbar/fenlei-select.png"
+      },
+      {
+        "pagePath": "pages/query/index",
+        "text": "查询",
+        "iconPath": "static/tabbar/exchange.png",
+        "selectedIconPath": "static/tabbar/exchange-select.png"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "猜谜"
+      }
+    },
+    {
+      "path": "pages/main/index",
+      "style": {
+        "navigationBarTitleText": "",
+        "titlePenetrate": "YES",
+        "transparentTitle": "always"
+      }
+    },
+    {
+      "path": "pages/query/index",
+      "style": {
+        "navigationBarTitleText": "查询",
+        "navigationBarBackgroundColor": "#ffffff"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages-mall",
+      "pages": [
+        {
+          "path": "login/index",
+          "style": {
+            "navigationBarTitleText": "登录",
+            "navigationBarBackgroundColor": "#ffffff"
+          }
+        },
+        {
+          "path": "ruleList/index",
+          "style": {
+            "navigationBarTitleText": "选择角色",
+            "navigationBarBackgroundColor": "#ffffff"
+          }
+        }
+      ]
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "小程序模版",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  }
+}
