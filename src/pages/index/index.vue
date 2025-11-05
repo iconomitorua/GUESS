@@ -240,8 +240,35 @@ export default Vue.extend({
   },
   methods: {
     async queryCards() {
-      const input = 'Amano-Iwato'
-      const res = await service.getCards(input);
+      const input = {
+        params: {
+          atkFrom: "",
+          atkTo: "",
+          attributeList: [],
+          cardType: "",
+          defFrom: "",
+          defTo: "",
+          effectList: [],
+          exclusionList: [],
+          keyword: "",
+          keywordLang: "0",
+          linkCondition: "1",
+          linkMarkerList: [],
+          mode: "1",
+          otherCondition: "1",
+          otherItemList: [],
+          page: "1",
+          pageSize: "10",
+          penScaleList: [],
+          searchType: "1",
+          sort: "1",
+          speciesList: [],
+          starList: [],
+          titleId: "1",
+          ullist: 0
+        }
+      }
+      const res = await service.getCard(input);
     },
     initGame() {
       this.answer = getRandomPokemon();

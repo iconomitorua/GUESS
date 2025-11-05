@@ -23,7 +23,7 @@ export async function ruoyiOrderCenterPost<T extends keyof paths>(
   // @ts-ignore
 ): Promise<paths[T]["post"]["responses"][200]["content"]["*/*"]> {
   try {
-    return await clientPost("/orderCenter" + url, data);
+    return await clientPost("" + url, data);
   } catch (error: any) {
     handleError(error);
     throw error; // 改为抛出错误而不是返回

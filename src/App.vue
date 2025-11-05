@@ -6,7 +6,7 @@
 <script lang="ts">
 import Vue from "vue";
 import store from "@/store";
-import { loginEffectiveness } from "./util/tools";
+import { loginEffectiveness } from "./utils/tools";
 // import { updateLoginWithWechatCode, queryMpConfig } from "./api/common";
 // import { uniLogin } from "./util/requests/query";
 export default Vue.extend({
@@ -24,88 +24,11 @@ export default Vue.extend({
     //   this.$isResolve();
     // });
   },
-  onShow() {},
+  onShow() { },
   onHide() {
     console.log("App Hide");
   },
   methods: {
-    async GetupdateLoginWithWechatCode(code: any, appId: any) {
-      const { loginWithWechatCode } = await updateLoginWithWechatCode({
-        code,
-        appId,
-      });
-      return {
-        // refreshToken: loginWithWechatCode?.refreshToken,
-        accessToken: loginWithWechatCode?.accessToken,
-      };
-    },
-
-    // 判断用户登录是否过期
-    async loginEffectiveness() {
-      // #ifdef  MP-WEIXIN
-      // 判断用户登录是否过期
-      let refreshToken = wx.getStorageSync("refreshToken");
-      const appId = uni.getAccountInfoSync().miniProgram.appId;
-      console.log(appId, "%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-      if (refreshToken == "") {
-        let code = "";
-        const loginResult: any = await uniLogin();
-        code = loginResult.code;
-
-        let { accessToken } = await this.GetupdateLoginWithWechatCode(
-          code,
-          appId
-        );
-
-        if (accessToken) {
-          uni.setStorageSync("refreshToken", accessToken);
-          this.$store.commit("setLoginStatus", true);
-        }
-        // if (accessToken) {
-        //   uni.setStorageSync("accessToken", accessToken);
-        //   this.$store.commit("setLoginStatus", true);
-        // }
-      } else {
-        let than = this;
-        wx.checkSession({
-          success() {
-            //session_key 未过期，并且在本生命周期一直有效
-            console.log("有效登录");
-          },
-          fail: async () => {
-            let code = "";
-            const loginResult: any = await uniLogin();
-            code = loginResult.code;
-            console.log("已经失效，需要重新执行登录流程");
-            // console.log(code, "code^^^^^^^^^^^");
-            // session_key 已经失效，需要重新执行登录流程
-            let { accessToken } = await than.GetupdateLoginWithWechatCode(
-              code,
-              appId
-            );
-
-            if (accessToken) {
-              uni.setStorageSync("refreshToken", accessToken);
-              uni.setStorageSync("isLogin", false);
-            }
-            // if (accessToken) {
-            //   uni.setStorageSync("accessToken", accessToken);
-            //   uni.setStorageSync("isLogin", false);
-            //   this.$store.commit("setLoginStatus", true);
-            // }
-          },
-        });
-      }
-      // #endif
-    },
-
-    async getStoreId(appId: string) {
-      try {
-        const res = await queryMpConfig({ appId });
-        const storeId = res.queryMpConfig?.storeId;
-        uni.setStorageSync("storeId", storeId);
-      } catch (error) {}
-    },
 
     /** 软件更新 */
     checkUpdate() {

@@ -14,16 +14,6 @@ function uniLogin() {
   });
 }
 
-// async function login(appId: string) {
-//   const loginResult: any = await uniLogin();
-//   const code = loginResult.code;
-//   const {
-//     loginWithWechatCode: { refreshToken },
-//   } = await loginWithWechatCode({ code, appId });
-
-//   uni.setStorageSync("refreshtoken", refreshToken);
-// }
-
 // 判断用户登录是否过期
 export async function loginEffectiveness() {
   const refreshtoken = wx.getStorageSync("refreshtoken");

@@ -7,8 +7,8 @@ import axiosMiniprogramAdapter from "axios-miniprogram-adapter";
 const apiClient = axios.create({
   baseURL:
     process.env.NODE_ENV === "development"
-      ? "http://192.168.0.39:8080"
-      : "https://api.147master.hetuntech.cn",
+      ? "https://yxwdbapi.windoent.com/konami"
+      : "https://yxwdbapi.windoent.com/konami",
   // @ts-ignore
   adapter: axiosMiniprogramAdapter,
   headers: {

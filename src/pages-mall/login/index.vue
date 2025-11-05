@@ -8,20 +8,12 @@
 
       <view class="user-box">
         <view class="user-name">
-          <u--input
-            placeholder="请输入账号"
-            prefixIcon="account-fill"
-            prefixIconStyle="font-size: 22px;color: #909399"
-          >
+          <u--input placeholder="请输入账号" prefixIcon="account-fill" prefixIconStyle="font-size: 22px;color: #909399">
           </u--input>
         </view>
         <view class="user-password">
-          <u--input
-            placeholder="请输入密码"
-            prefixIcon="lock-fill"
-            type="password"
-            prefixIconStyle="font-size: 22px;color: #909399"
-          ></u--input>
+          <u--input placeholder="请输入密码" prefixIcon="lock-fill" type="password"
+            prefixIconStyle="font-size: 22px;color: #909399"></u--input>
         </view>
       </view>
 
@@ -33,7 +25,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { handleError } from "@/util/tools";
+import { handleError } from "@/utils/tools";
 export default Vue.extend({
   data() {
     return {
@@ -41,7 +33,7 @@ export default Vue.extend({
       password: "",
     };
   },
-  async onLoad(options: any) {},
+  async onLoad(options: any) { },
   methods: {
     login() {
       try {
@@ -74,6 +66,7 @@ page {
 <style lang="scss" scoped>
 .box {
   width: 100%;
+
   .box-center {
     width: 100%;
     padding: 0 32rpx;
@@ -82,10 +75,12 @@ page {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     .icon {
       @include imageFlex(240rpx, 240rpx);
       margin-top: 160rpx;
     }
+
     .title {
       font-size: 48rpx;
       font-weight: bold;
@@ -93,13 +88,16 @@ page {
       color: #cd1800;
       margin-top: 30rpx;
     }
+
     .user-box {
       width: 622rpx;
       margin-top: 128rpx;
+
       .user-password {
         margin-top: 48rpx;
       }
     }
+
     .btn {
       width: 622rpx;
       height: 96rpx;
@@ -113,6 +111,7 @@ page {
       color: #ffffff;
       margin-top: 40rpx;
     }
+
     .text {
       font-size: 28rpx;
       line-height: 42rpx;
