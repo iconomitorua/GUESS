@@ -5,6 +5,7 @@
       <view class="navbar-content">
         <text class="navbar-title">宝可猜谜</text>
         <view class="navbar-actions">
+          <u-icon name="question-circle" color="#fff" size="20" @click="showTipModal = true"></u-icon>
           <text class="nav-icon" @click="startDailyChallenge">🔄</text>
           <text class="nav-icon" @click="showSettings">⚙️</text>
         </view>
@@ -39,9 +40,10 @@
         <view v-if="showSuggestions && filteredPokemonList.length > 0" class="suggestions-list">
           <view v-for="(pokemon, index) in filteredPokemonList" :key="index" class="suggestion-item"
             @click="selectPokemon(pokemon)">
-            <text class="suggestion-name">{{ pokemon.name }}</text>
+            <text class="suggestion-name">{{ pokemon.cardName }}</text>
             <view class="suggestion-tags">
-              <u-tag v-for="(type, i) in pokemon.types" :key="i" :text="type" size="mini" type="info" plain></u-tag>
+              <u-tag v-for="(type, i) in pokemon.speciesName" :key="i" :text="type" size="mini" type="info"
+                plain></u-tag>
             </view>
           </view>
         </view>
@@ -142,7 +144,24 @@
         </view>
       </view>
     </view>
+    <u-modal v-model="showTipModal" :show-cancel-button="false" :show-confirm-button="false">
+      <view class="modal-content">
+        游戏提示:
+        通过输入宝可梦名称进行猜测，找出目标宝可梦。每次猜测后，你将获得输入宝可梦的相关信息，帮助你逐步接近答案
+        提示颜色说明:
+        正确
+        ■接近■错误
+        的触发条件:
+        賎蔹圖兆芽餾恃族值总和:与目标宝可梦的差值≤50单项种族值:与目标宝可梦的差值≤10世代:与目标世代相邻
+        进化方式:不完全相同但属于相似进化方式(例如同为等级进化、道具进化、亲密度进化等)
+        形态标签:两只宝可梦都有地区形态或特殊形态，但具体类型溸月人同
+        上下箭头的作用:
+        在种族值总和、单项种族值、世代等数值类信息中，箭头提示你猜测的方向是否正确:
+        表示你输入的宝可梦的该数值低于目标宝可梦个:
+        〗蘗媂害:表示你输入的宝可梦的该数值高于目标宝可梦
 
+      </view>
+    </u-modal>
     <!-- 成功弹窗 -->
     <u-modal v-model="showSuccessModal" :show-cancel-button="false" :show-confirm-button="false">
       <view class="modal-content">
@@ -219,6 +238,7 @@ import Vue from "vue";
 import { Pokemon, GuessRecord, MatchType } from "./data";
 import { getRandomPokemon, searchPokemonByName, pokemonDatabase } from "./server";
 import service from "@/api/index";
+import { CardInput } from "@/api/data";
 export default Vue.extend({
   data() {
     return {
@@ -227,48 +247,39 @@ export default Vue.extend({
       guessRecords: [] as GuessRecord[],
       remainingAttempts: 10,
       maxAttempts: 10,
+      showTipModal: false,
       showSuccessModal: false,
       showFailModal: false,
       showSuggestions: false,
       filteredPokemonList: [] as Pokemon[],
+      lock: false
     };
   },
   async onLoad() {
-    this.queryCards();
+    // this.queryCards();
 
     this.initGame();
   },
   methods: {
-    async queryCards() {
-      const input = {
-        params: {
-          atkFrom: "",
-          atkTo: "",
-          attributeList: [],
-          cardType: "",
-          defFrom: "",
-          defTo: "",
-          effectList: [],
-          exclusionList: [],
-          keyword: "",
-          keywordLang: "0",
-          linkCondition: "1",
-          linkMarkerList: [],
-          mode: "1",
-          otherCondition: "1",
-          otherItemList: [],
-          page: "1",
-          pageSize: "10",
-          penScaleList: [],
-          searchType: "1",
-          sort: "1",
-          speciesList: [],
-          starList: [],
-          titleId: "1",
-          ullist: 0
+    async queryCards(keyword = '') {
+      try {
+        const input: CardInput = {
+          params: {
+            page: 1,
+            pageSize: 10000
+            // speciesList: [14],
+          },
         }
+        const res: any = await service.getCard(input);
+        if (res.result.code === 200000 && res.response.cardList && res.response.cardList.length > 0) {
+          this.filteredPokemonList = res.response.cardList;
+        }
+      } catch (error) {
+        console.error('查询卡片失败:', error);
+      } finally {
+        this.lock = false;
+        this.showSuggestions = this.filteredPokemonList.length > 0; // 根据过滤后的列表是否为空来决定是否显示建议列表
       }
-      const res = await service.getCard(input);
     },
     initGame() {
       this.answer = getRandomPokemon();
@@ -284,6 +295,7 @@ export default Vue.extend({
 
     // 处理搜索输入变化
     handleSearchChange(value: string) {
+      if (this.lock) return;
       if (!value || value.trim() === "") {
         this.showSuggestions = false;
         this.filteredPokemonList = [];
@@ -292,11 +304,12 @@ export default Vue.extend({
 
       // 过滤宝可梦列表，查找包含输入文本的名称
       const searchTerm = value.toLowerCase();
-      this.filteredPokemonList = pokemonDatabase
-        .filter((pokemon) => pokemon.name.toLowerCase().includes(searchTerm))
-        .slice(0, 5); // 最多显示5个建议
+      const timer = setTimeout(() => {
+        this.lock = true;
+        this.queryCards(searchTerm);
+        clearTimeout(timer);
+      }, 300)
 
-      this.showSuggestions = this.filteredPokemonList.length > 0;
     },
 
     // 选择建议的宝可梦
@@ -498,7 +511,7 @@ page {
 .custom-navbar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20rpx 30rpx;
-  padding-top: calc(20rpx + var(--status-bar-height));
+  // padding-top: calc(20rpx + var(--status-bar-height));
 
   .navbar-content {
     display: flex;
@@ -551,7 +564,7 @@ page {
   display: flex;
   align-items: center;
   gap: 15rpx;
-  margin-bottom: 20rpx;
+  // margin-bottom: 20rpx;
 
   .card-icon {
     font-size: 36rpx;
@@ -575,7 +588,7 @@ page {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  padding: 20rpx 0;
+  // padding: 20rpx 0;
 
   .attempts-number {
     font-size: 80rpx;

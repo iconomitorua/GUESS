@@ -40,5 +40,24 @@ export async function loginEffectiveness() {
 }
 
 export const handleError = (error: any) => {
-  uni.showToast({ title: error, icon: "none" });
+  let errorMessage = "请求失败";
+
+  if (typeof error === "string") {
+    errorMessage = error;
+  } else if (error?.message) {
+    errorMessage = error.message;
+  } else if (error?.errMsg) {
+    errorMessage = error.errMsg;
+  } else if (error) {
+    errorMessage = String(error);
+  }
+
+  uni.showToast({ title: errorMessage, icon: "none" });
 };
+
+
+
+function debounce(func: any, Function: FunctionConstructor, wait: any, number: any) {
+  throw new Error("Function not implemented.");
+}
+

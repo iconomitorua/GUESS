@@ -1,5 +1,4 @@
 import { paths } from "@/options/zeus/ruoyiOrderCenter";
-import { handleError } from "@/utils/tools";
 import { clientPost, clientGet } from "../../apollo";
 
 export async function ruoyiOrderCenterGet<T extends keyof paths>(
@@ -11,8 +10,8 @@ export async function ruoyiOrderCenterGet<T extends keyof paths>(
   try {
     return await clientGet("/orderCenter" + url, data);
   } catch (error: any) {
-    handleError(error);
-    throw error; // 改为抛出错误而不是返回
+    // clientGet 内部已经处理了 handleError，这里直接抛出
+    throw error;
   }
 }
 
@@ -25,7 +24,7 @@ export async function ruoyiOrderCenterPost<T extends keyof paths>(
   try {
     return await clientPost("" + url, data);
   } catch (error: any) {
-    handleError(error);
-    throw error; // 改为抛出错误而不是返回
+    // clientPost 内部已经处理了 handleError，这里直接抛出
+    throw error;
   }
 }

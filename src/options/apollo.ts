@@ -6,8 +6,8 @@ import axiosMiniprogramAdapter from "axios-miniprogram-adapter";
 // 创建 axios 实例
 const apiClient = axios.create({
   baseURL:
-    process.env.NODE_ENV === "development"
-      ? "https://yxwdbapi.windoent.com/konami"
+    process.env.NODE_ENV === "development1"
+      ? "http://localhost:3000/konami"  // 改为本地后端
       : "https://yxwdbapi.windoent.com/konami",
   // @ts-ignore
   adapter: axiosMiniprogramAdapter,
@@ -44,12 +44,18 @@ export async function clientPost(
 ) {
   try {
     const response = await apiClient.post(url, data, config);
-    if (response.data.code === 200) {
+    // 适配多种返回格式：codes、result.code、code
+    const isSuccess =
+      response.data.codes === 200000 ||
+      response.data.result?.code === 200000 ||
+      response.data.code === 200;
+
+    if (isSuccess) {
       return response.data;
     } else {
-      handleError(response.data.msg);
+      const errorMsg = response.data.message || response.data.msg || "请求失败";
+      handleError(errorMsg);
       return response.data;
-      // throw response.data.msg;
     }
   } catch (error: any) {
     handleError(error);
@@ -64,11 +70,18 @@ export async function clientGet(
 ) {
   try {
     const response = await apiClient.get(url, data);
-    if (response.data.code === 200) {
+    // 适配多种返回格式：codes、result.code、code
+    const isSuccess =
+      response.data.codes === 200000 ||
+      response.data.result?.code === 200000 ||
+      response.data.code === 200;
+
+    if (isSuccess) {
       return response.data;
     } else {
-      handleError(response.data.msg);
-      throw response.data.msg;
+      const errorMsg = response.data.message || response.data.msg || "请求失败";
+      handleError(errorMsg);
+      throw errorMsg;
     }
   } catch (error: any) {
     handleError(error);
