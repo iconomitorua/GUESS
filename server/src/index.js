@@ -9,7 +9,7 @@ const cardRoutes = require('./routes/cards');
 
 // 创建 Express 应用
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // 连接数据库
 connectDB();

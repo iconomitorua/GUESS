@@ -97,7 +97,7 @@ export default {
      */
     getCard: async (data: any) => {
         try {
-            const res = await ruoyiOrderCenterPost("/card/search", data);
+            const res = await ruoyiOrderCenterPost("/cards", data);
             return res;
         } catch (error) {
             throw error;

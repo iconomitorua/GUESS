@@ -6,8 +6,8 @@ import axiosMiniprogramAdapter from "axios-miniprogram-adapter";
 // 创建 axios 实例
 const apiClient = axios.create({
   baseURL:
-    process.env.NODE_ENV === "development1"
-      ? "http://localhost:3000/konami"  // 改为本地后端
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3001/konami"  // 改为本地后端
       : "https://yxwdbapi.windoent.com/konami",
   // @ts-ignore
   adapter: axiosMiniprogramAdapter,

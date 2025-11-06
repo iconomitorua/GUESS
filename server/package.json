@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "init-db": "node src/utils/initDatabase.js"
+    "init-db": "node src/utils/initDatabase.js",
+    "import-cn": "node src/utils/importCNCards.js"
   },
   "keywords": ["yugioh", "card", "api"],
   "author": "",

@@ -256,7 +256,7 @@ export default Vue.extend({
     };
   },
   async onLoad() {
-    // this.queryCards();
+    this.queryCards();
 
     this.initGame();
   },
@@ -266,7 +266,8 @@ export default Vue.extend({
         const input: CardInput = {
           params: {
             page: 1,
-            pageSize: 10000
+            pageSize: 10,
+            keyword
             // speciesList: [14],
           },
         }
