@@ -7,7 +7,7 @@ export interface Card<T = any> {
     defTo?: T;
     effectList?: T[];
     exclusionList?: T[];
-    keyword: T;
+    keyword?: T;
     keywordLang?: T;
     linkCondition?: T;
     linkMarkerList?: T[];
@@ -24,6 +24,7 @@ export interface Card<T = any> {
     titleId?: T;
     ullist?: T;
     lang?: T;
+    cardName?: T;
 }
 
 export interface CardInput {

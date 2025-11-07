@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <view class="custom-navbar">
       <view class="navbar-content">
-        <text class="navbar-title">宝可猜谜</text>
+        <text class="navbar-title">游戏王猜谜</text>
         <view class="navbar-actions">
           <u-icon name="question-circle" color="#fff" size="20" @click="showTipModal = true"></u-icon>
           <text class="nav-icon" @click="startDailyChallenge">🔄</text>
@@ -33,24 +33,24 @@
     <!-- 输入区域 -->
     <view class="card input-card">
       <view class="input-wrapper">
-        <u-search v-model="guessInput" placeholder="请输入宝可梦名称..." :show-action="false" shape="round"
-          @search="submitGuess" @change="handleSearchChange"></u-search>
+        <u-search v-model="guessInput" placeholder="请输入游戏王卡片名称..." :show-action="false" shape="round"
+          @change="handleSearchChange"></u-search>
 
         <!-- 搜索建议列表 -->
         <view v-if="showSuggestions && filteredPokemonList.length > 0" class="suggestions-list">
           <view v-for="(pokemon, index) in filteredPokemonList" :key="index" class="suggestion-item"
             @click="selectPokemon(pokemon)">
-            <text class="suggestion-name">{{ pokemon.cardName }}</text>
-            <view class="suggestion-tags">
+            <text class="suggestion-name" @click="selectCard">{{ pokemon.cardName }}</text>
+            <!-- <view class="suggestion-tags">
               <u-tag v-for="(type, i) in pokemon.speciesName" :key="i" :text="type" size="mini" type="info"
                 plain></u-tag>
-            </view>
+            </view> -->
           </view>
         </view>
 
         <u-button type="primary" :custom-style="{ marginTop: '20rpx' }" @click="submitGuess" size="large"
           shape="circle">
-          确定提交
+          确定该卡片
         </u-button>
       </view>
     </view>
@@ -69,75 +69,68 @@
       <view class="history-card" v-for="(record, index) in guessRecords" :key="index">
         <view class="card">
           <view class="pokemon-header">
-            <text class="pokemon-name">{{ record.pokemon.name }}</text>
+            <text class="pokemon-name">{{ record.pokemon.cardName }}</text>
             <u-tag :text="`第${guessRecords.length - index}次`" type="primary" plain size="mini"></u-tag>
           </view>
 
           <view class="pokemon-details">
-            <!-- 世代 -->
-            <view class="detail-row">
-              <text class="detail-label">世代：</text>
-              <u-tag :text="record.pokemon.generation" :type="getTagType(record.matches.generation)"
-                size="default"></u-tag>
-            </view>
-
             <!-- 属性 -->
             <view class="detail-row">
               <text class="detail-label">属性：</text>
-              <view class="tags-group">
-                <u-tag v-for="(type, i) in record.pokemon.types" :key="i" :text="type"
-                  :type="getTagType(record.matches.types)" size="default"></u-tag>
-              </view>
-            </view>
-
-            <!-- 特性 -->
-            <view class="detail-row">
-              <text class="detail-label">特性：</text>
-              <view class="tags-group">
-                <u-tag v-for="(ability, i) in record.pokemon.abilities" :key="i" :text="ability"
-                  :type="getTagType(record.matches.abilities)" size="mini"></u-tag>
-              </view>
-            </view>
-
-            <!-- 进化阶段 -->
-            <view class="detail-row">
-              <text class="detail-label">进化：</text>
-              <u-tag :text="`${record.pokemon.evolutionStage}阶进化`" :type="getTagType(record.matches.evolutionStage)"
+              <u-tag :text="record.pokemon.attributeName" :type="getTagType(record.matches.attributeName)"
                 size="default"></u-tag>
             </view>
 
-            <!-- 进化条件 -->
-            <view class="detail-row">
-              <text class="detail-label">方式：</text>
-              <u-tag :text="record.pokemon.evolutionLevel" :type="getTagType(record.matches.evolutionLevel)"
-                size="default"></u-tag>
-            </view>
-
-            <!-- 体形 -->
-            <view class="detail-row">
-              <text class="detail-label">体形：</text>
-              <u-tag :text="record.pokemon.bodyShape" :type="getTagType(record.matches.bodyShape)"
-                size="default"></u-tag>
-            </view>
-
-            <!-- 颜色 -->
-            <view class="detail-row">
-              <text class="detail-label">颜色：</text>
-              <u-tag :text="record.pokemon.color" :type="getTagType(record.matches.color)" size="default"></u-tag>
-            </view>
-
-            <!-- 蛋群 -->
-            <view class="detail-row">
-              <text class="detail-label">蛋群：</text>
+            <!-- 种族 -->
+            <view class="detail-row" v-if="record.pokemon.speciesName && record.pokemon.speciesName.length > 0">
+              <text class="detail-label">种族：</text>
               <view class="tags-group">
-                <u-tag v-for="(group, i) in record.pokemon.eggGroups" :key="i" :text="group"
-                  :type="getTagType(record.matches.eggGroups)" size="mini"></u-tag>
+                <u-tag v-for="(species, i) in record.pokemon.speciesName" :key="i" :text="species"
+                  :type="getTagType(record.matches.speciesName)" size="default"></u-tag>
               </view>
             </view>
-            <!-- 种族值 -->
-            <view class="detail-row">
-              <text class="detail-label">种族值：</text>
-              <u-tag :text="String(record.pokemon.baseStats)" :type="getTagType(record.matches.baseStats)"
+
+            <!-- 星级 -->
+            <view class="detail-row" v-if="record.pokemon.starchip != null">
+              <text class="detail-label">星级：</text>
+              <u-tag :text="`${record.pokemon.starchip}星`" :type="getTagType(record.matches.starchip)"
+                size="default"></u-tag>
+            </view>
+
+            <!-- 攻击力 -->
+            <view class="detail-row" v-if="record.pokemon.atk != null">
+              <text class="detail-label">攻击力：</text>
+              <u-tag :text="String(record.pokemon.atk)" :type="getTagType(record.matches.atk)"
+                size="default"></u-tag>
+            </view>
+
+            <!-- 防御力 -->
+            <view class="detail-row" v-if="record.pokemon.def != null">
+              <text class="detail-label">防御力：</text>
+              <u-tag :text="String(record.pokemon.def)" :type="getTagType(record.matches.def)"
+                size="default"></u-tag>
+            </view>
+
+            <!-- 卡片类型 -->
+            <view class="detail-row" v-if="record.pokemon.otherItemNameList && record.pokemon.otherItemNameList.length > 0">
+              <text class="detail-label">类型：</text>
+              <view class="tags-group">
+                <u-tag v-for="(type, i) in record.pokemon.otherItemNameList" :key="i" :text="type"
+                  :type="getTagType(record.matches.otherItemNameList)" size="mini"></u-tag>
+              </view>
+            </view>
+
+            <!-- 灵摆刻度 -->
+            <view class="detail-row" v-if="record.pokemon.penScale != null">
+              <text class="detail-label">灵摆：</text>
+              <u-tag :text="`刻度${record.pokemon.penScale}`" :type="getTagType(record.matches.penScale)"
+                size="default"></u-tag>
+            </view>
+
+            <!-- Link数量 -->
+            <view class="detail-row" v-if="record.pokemon.linkMarkerCount != null">
+              <text class="detail-label">Link：</text>
+              <u-tag :text="`Link-${record.pokemon.linkMarkerCount}`" :type="getTagType(record.matches.linkMarkerCount)"
                 size="default"></u-tag>
             </view>
           </view>
@@ -146,20 +139,18 @@
     </view>
     <u-modal v-model="showTipModal" :show-cancel-button="false" :show-confirm-button="false">
       <view class="modal-content">
-        游戏提示:
-        通过输入宝可梦名称进行猜测，找出目标宝可梦。每次猜测后，你将获得输入宝可梦的相关信息，帮助你逐步接近答案
-        提示颜色说明:
-        正确
-        ■接近■错误
-        的触发条件:
-        賎蔹圖兆芽餾恃族值总和:与目标宝可梦的差值≤50单项种族值:与目标宝可梦的差值≤10世代:与目标世代相邻
-        进化方式:不完全相同但属于相似进化方式(例如同为等级进化、道具进化、亲密度进化等)
-        形态标签:两只宝可梦都有地区形态或特殊形态，但具体类型溸月人同
-        上下箭头的作用:
-        在种族值总和、单项种族值、世代等数值类信息中，箭头提示你猜测的方向是否正确:
-        表示你输入的宝可梦的该数值低于目标宝可梦个:
-        〗蘗媂害:表示你输入的宝可梦的该数值高于目标宝可梦
+        <view class="tip-title">游戏提示:</view>
+        <view class="tip-text">通过输入游戏王卡片名称进行猜测，找出目标卡片。每次猜测后，你将获得输入卡片的相关信息，帮助你逐步接近答案。</view>
 
+        <view class="tip-title">提示颜色说明:</view>
+        <view class="tip-item">✅ 正确：完全匹配</view>
+        <view class="tip-item">⚠️ 接近：部分匹配</view>
+        <view class="tip-item">❌ 错误：不匹配</view>
+
+        <view class="tip-title">"接近"的触发条件:</view>
+        <view class="tip-text">• 攻击力/防御力：与目标卡片的差值≤500</view>
+        <view class="tip-text">• 星级：与目标星级的差值≤2</view>
+        <view class="tip-text">• 种族/类型：部分匹配</view>
       </view>
     </u-modal>
     <!-- 成功弹窗 -->
@@ -167,24 +158,27 @@
       <view class="modal-content">
         <view class="modal-icon success">✅</view>
         <view class="modal-title">你获得了胜利！</view>
-        <view class="modal-subtitle" v-if="answer">{{ answer.name }}</view>
+        <view class="modal-subtitle" v-if="answer">{{ answer.cardName }}</view>
 
         <view class="answer-details" v-if="answer">
           <view class="answer-row">
-            <u-tag :text="answer.generation" type="success"></u-tag>
-            <u-tag v-for="(type, i) in answer.types" :key="i" :text="type" type="success"></u-tag>
+            <u-tag :text="answer.attributeName" type="success"></u-tag>
+            <u-tag v-for="(species, i) in answer.speciesName" :key="i" :text="species" type="success"></u-tag>
           </view>
-          <view class="answer-text">
-            {{ answer.evolutionStage }}阶进化 · {{ answer.evolutionLevel }}
+          <view class="answer-text" v-if="answer.starchip != null">
+            星级：{{ answer.starchip }}星
           </view>
-          <view class="answer-text">
-            特性：{{ answer.abilities.join("、") }}
+          <view class="answer-text" v-if="answer.atk != null || answer.def != null">
+            攻击力：{{ answer.atk != null ? answer.atk : '?' }} / 防御力：{{ answer.def != null ? answer.def : '?' }}
           </view>
-          <view class="answer-text">
-            体形：{{ answer.bodyShape }} · 颜色：{{ answer.color }}
+          <view class="answer-text" v-if="answer.otherItemNameList && answer.otherItemNameList.length > 0">
+            类型：{{ answer.otherItemNameList.join("、") }}
           </view>
-          <view class="answer-text">
-            蛋群：{{ answer.eggGroups.join("、") }} · 种族值：{{ answer.baseStats }}
+          <view class="answer-text" v-if="answer.penScale != null">
+            灵摆刻度：{{ answer.penScale }}
+          </view>
+          <view class="answer-text" v-if="answer.linkMarkerCount != null">
+            Link-{{ answer.linkMarkerCount }}
           </view>
         </view>
 
@@ -210,15 +204,15 @@
       <view class="modal-content">
         <view class="modal-icon fail">❌</view>
         <view class="modal-title">很遗憾，挑战失败！</view>
-        <view class="modal-subtitle" v-if="answer">正确答案是：{{ answer.name }}</view>
+        <view class="modal-subtitle" v-if="answer">正确答案是：{{ answer.cardName }}</view>
 
         <view class="answer-details" v-if="answer">
           <view class="answer-row">
-            <u-tag :text="answer.generation" type="success"></u-tag>
-            <u-tag v-for="(type, i) in answer.types" :key="i" :text="type" type="success"></u-tag>
+            <u-tag :text="answer.attributeName" type="success"></u-tag>
+            <u-tag v-for="(species, i) in answer.speciesName" :key="i" :text="species" type="success"></u-tag>
           </view>
-          <view class="answer-text">
-            种族值：{{ answer.baseStats }}
+          <view class="answer-text" v-if="answer.atk != null || answer.def != null">
+            攻击力：{{ answer.atk != null ? answer.atk : '?' }} / 防御力：{{ answer.def != null ? answer.def : '?' }}
           </view>
         </view>
 
@@ -242,7 +236,7 @@ import { CardInput } from "@/api/data";
 export default Vue.extend({
   data() {
     return {
-      answer: null as Pokemon | null,
+      answer: {} as Pokemon,
       guessInput: "",
       guessRecords: [] as GuessRecord[],
       remainingAttempts: 10,
@@ -252,12 +246,14 @@ export default Vue.extend({
       showFailModal: false,
       showSuggestions: false,
       filteredPokemonList: [] as Pokemon[],
-      lock: false
+      lock: false,
+      currentCard: {} as any,
+      callbackIndex: 0,
     };
   },
   async onLoad() {
-    this.queryCards();
-
+    this.getStatistics();
+    // this.queryCards();
     this.initGame();
   },
   methods: {
@@ -267,12 +263,12 @@ export default Vue.extend({
           params: {
             page: 1,
             pageSize: 10,
+            lang: 'cn',
             keyword
-            // speciesList: [14],
           },
         }
         const res: any = await service.getCard(input);
-        if (res.result.code === 200000 && res.response.cardList && res.response.cardList.length > 0) {
+        if (res.result.code === 200 && res.response.cardList && res.response.cardList.length > 0) {
           this.filteredPokemonList = res.response.cardList;
         }
       } catch (error) {
@@ -280,6 +276,48 @@ export default Vue.extend({
       } finally {
         this.lock = false;
         this.showSuggestions = this.filteredPokemonList.length > 0; // 根据过滤后的列表是否为空来决定是否显示建议列表
+      }
+    },
+    //获取统计数据
+    async getStatistics() {
+      try {
+        const res: any = await service.getStatistics();
+        if (res.code === 200) {
+          let totalNum = res.response.total;
+          this.queryCardById(totalNum)
+        }
+      } catch (error) {
+        console.error('获取统计数据失败:', error);
+      } finally {
+      }
+    },
+    //用卡名查询
+    async queryCardById(max: number) {
+      try {
+        //id从1-max随机取一个
+        const id = Math.floor(Math.random() * max) + 1;
+        const res: any = await service.getCardById(id);
+        if (res.code === 200) {
+          if (res.response.card.id)
+            this.answer = res.response.card;
+          else {
+            this.callbackIndex++
+            if (this.callbackIndex < 6) {
+              this.callbackIndex++
+              this.queryCardById(max)
+            } else uni.showToast({
+              title: "查询失败,手机即将爆炸！！！",
+              icon: "none",
+            })
+          }
+        }
+
+        // if (res.result.code === 200 && res.response.cardList && res.response.cardList.length > 0) {
+        //   this.filteredPokemonList = res.response.cardList;
+        // }
+      } catch (error) {
+        console.error('查询卡片失败:', error);
+      } finally {
       }
     },
     initGame() {
@@ -313,92 +351,86 @@ export default Vue.extend({
 
     },
 
-    // 选择建议的宝可梦
+    // 选择建议的游戏王卡片
     selectPokemon(pokemon: Pokemon) {
-      this.guessInput = pokemon.name;
+      this.guessInput = pokemon.cardName;
+      this.currentCard = pokemon;
       this.showSuggestions = false;
       this.filteredPokemonList = [];
     },
-
+    selectCard(info: any) {
+      this.currentCard = info;
+    },
     submitGuess() {
       if (!this.guessInput.trim()) {
         uni.showToast({
-          title: "请输入宝可梦名称",
+          title: "请输入游戏王卡片名称",
           icon: "none",
         });
         return;
       }
 
-      const guessPokemon = searchPokemonByName(this.guessInput.trim());
-      if (!guessPokemon) {
+      if (!this.currentCard || !this.currentCard.cardName) {
         uni.showToast({
-          title: "未找到该宝可梦",
+          title: "请先选择一张卡片",
           icon: "none",
         });
         return;
       }
 
-      if (
-        this.guessRecords.some((r) => r.pokemon.name === guessPokemon.name)
-      ) {
-        uni.showToast({
-          title: "已经猜过该宝可梦了",
-          icon: "none",
-        });
-        return;
-      }
-
-      const matches = this.compareAttributes(guessPokemon, this.answer!);
-
-      this.guessRecords.unshift({
-        pokemon: guessPokemon,
-        matches: matches,
-      });
-      console.log(this.guessRecords, '---1-1-');
-
-      this.remainingAttempts--;
-      this.guessInput = "";
-
-      if (guessPokemon.name === this.answer!.name) {
+      // 检查是否正确
+      if (this.currentCard.cardName === this.answer.cardName) {
         setTimeout(() => {
           this.showSuccessModal = true;
         }, 500);
         return;
       }
 
+      // 错误的情况，添加到猜测记录并减少次数
+      const matches = this.compareAttributes(this.currentCard, this.answer);
+      this.guessRecords.push({
+        pokemon: this.currentCard,
+        matches: matches
+      });
+
+      this.remainingAttempts--;
+      this.guessInput = "";
+      this.currentCard = {};
+      this.showSuggestions = false;
+
+      // 检查是否用完次数
       if (this.remainingAttempts <= 0) {
         setTimeout(() => {
           this.showFailModal = true;
         }, 500);
-        return;
       }
     },
 
     compareAttributes(guess: Pokemon, answer: Pokemon) {
       return {
-        generation: this.compareExact(guess.generation, answer.generation),
-        types: this.compareArray(guess.types, answer.types),
-        abilities: this.compareArray(guess.abilities, answer.abilities),
-        evolutionStage: this.compareExact(
-          guess.evolutionStage,
-          answer.evolutionStage
-        ),
-        evolutionLevel: this.compareExact(
-          guess.evolutionLevel,
-          answer.evolutionLevel
-        ),
-        bodyShape: this.compareExact(guess.bodyShape, answer.bodyShape),
-        color: this.compareExact(guess.color, answer.color),
-        eggGroups: this.compareArray(guess.eggGroups, answer.eggGroups),
-        baseStats: this.compareNumber(guess.baseStats, answer.baseStats),
+        attributeName: this.compareExact(guess.attributeName, answer.attributeName),
+        speciesName: this.compareArray(guess.speciesName, answer.speciesName),
+        starchip: this.compareStarchip(guess.starchip, answer.starchip),
+        atk: this.compareNumber(guess.atk, answer.atk, 500),
+        def: this.compareNumber(guess.def, answer.def, 500),
+        otherItemNameList: this.compareArray(guess.otherItemNameList, answer.otherItemNameList),
+        penScale: this.compareExact(guess.penScale, answer.penScale),
+        linkMarkerCount: this.compareExact(guess.linkMarkerCount, answer.linkMarkerCount),
       };
     },
 
     compareExact(guess: any, answer: any): MatchType {
-      return guess === answer ? "exact" : "none";
+      if (guess === answer) return "exact";
+      // 处理 null/undefined 情况
+      if (guess == null && answer == null) return "exact";
+      if (guess == null || answer == null) return "none";
+      return "none";
     },
 
     compareArray(guessArray: any[], answerArray: any[]): MatchType {
+      if (!guessArray || !answerArray) return "none";
+      if (guessArray.length === 0 || answerArray.length === 0) return "none";
+
       const hasExactMatch = guessArray.some((item) =>
         answerArray.includes(item)
       );
@@ -411,9 +443,17 @@ export default Vue.extend({
       return "none";
     },
 
-    compareNumber(guess: number, answer: number): MatchType {
+    compareNumber(guess: number, answer: number, threshold: number = 500): MatchType {
+      if (guess == null || answer == null) return "none";
       if (guess === answer) return "exact";
-      if (Math.abs(guess - answer) <= 50) return "partial";
+      if (Math.abs(guess - answer) <= threshold) return "partial";
+      return "none";
+    },
+
+    compareStarchip(guess: number, answer: number): MatchType {
+      if (guess == null || answer == null) return "none";
+      if (guess === answer) return "exact";
+      if (Math.abs(guess - answer) <= 2) return "partial";
       return "none";
     },
 
@@ -452,7 +492,7 @@ export default Vue.extend({
     showHint() {
       if (this.answer) {
         uni.showToast({
-          title: `提示：世代是${this.answer.generation}`,
+          title: `提示：属性是${this.answer.attributeName}`,
           icon: "none",
           duration: 2000,
         });
@@ -835,5 +875,30 @@ page {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+// 提示弹窗样式
+.tip-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-top: 20rpx;
+  margin-bottom: 10rpx;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.tip-text,
+.tip-item {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 48rpx;
+  margin-bottom: 8rpx;
+}
+
+.tip-item {
+  padding-left: 10rpx;
 }
 </style>

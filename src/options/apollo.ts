@@ -46,8 +46,8 @@ export async function clientPost(
     const response = await apiClient.post(url, data, config);
     // 适配多种返回格式：codes、result.code、code
     const isSuccess =
-      response.data.codes === 200000 ||
-      response.data.result?.code === 200000 ||
+      response.data.codes === 200 ||
+      response.data.result?.code === 200 ||
       response.data.code === 200;
 
     if (isSuccess) {
@@ -72,8 +72,8 @@ export async function clientGet(
     const response = await apiClient.get(url, data);
     // 适配多种返回格式：codes、result.code、code
     const isSuccess =
-      response.data.codes === 200000 ||
-      response.data.result?.code === 200000 ||
+      response.data.codes === 200 ||
+      response.data.result?.code === 200 ||
       response.data.code === 200;
 
     if (isSuccess) {

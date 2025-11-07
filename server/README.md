@@ -116,10 +116,10 @@ GET /konami/card/search
 
 ```json
 {
-  "code": 200000,
+  "code": 200,
   "message": "SUCCESS",
   "result": {
-    "code": 200000,
+    "code": 200,
     "message": "TRUE"
   },
   "response": {
@@ -151,6 +151,7 @@ GET /konami/card/search
 ### 2. 查看数据
 
 运行 `npm run init-db` 后，可以在 Navicat 中看到 `cards` 表，包含所有卡片数据。
+`npm run import-cn`
 
 ## 添加中文卡片名称
 

@@ -1,32 +1,36 @@
-// 宝可梦数据类型定义
-export interface Pokemon {
+// 游戏王卡片数据类型定义
+export interface YugiohCard {
   id: number;
-  name: string; // 名称
-  generation: string; // 世代 (G1-G9)
-  types: string[]; // 属性 (火、水、草等)
-  abilities: string[]; // 特性
-  evolutionStage: number; // 进化阶段 (0=未进化, 1=1阶, 2=2阶)
-  evolutionLevel?: string; // 进化条件
-  bodyShape: string; // 体形
-  color: string; // 颜色
-  eggGroups: string[]; // 蛋群
-  baseStats: number; // 种族值
-  image?: string; // 图片URL
+  cardId: number; // 卡片ID
+  cardName: string; // 卡片名称
+  attributeName: string; // 属性（光属性、暗属性、水属性等）
+  speciesName: string[]; // 种族（龙族、战士族等）
+  starchip: number; // 星级/等级
+  atk: number; // 攻击力
+  def: number; // 防御力
+  effectName: string; // 效果名称
+  otherItemNameList: string[]; // 类型列表（融合、同步、超量、连接等）
+  penScale: number; // 灵摆刻度
+  linkMarkerCount: number; // Link数量
+  cardText?: string; // 卡片效果描述
+  imageKey?: string; // 图片密钥
 }
+
+// 为了兼容性，保留 Pokemon 别名
+export type Pokemon = YugiohCard;
 
 // 猜测记录
 export interface GuessRecord {
-  pokemon: Pokemon;
+  pokemon: YugiohCard;
   matches: {
-    generation: MatchType;
-    types: MatchType;
-    abilities: MatchType;
-    evolutionStage: MatchType;
-    evolutionLevel: MatchType;
-    bodyShape: MatchType;
-    color: MatchType;
-    eggGroups: MatchType;
-    baseStats: MatchType;
+    attributeName: MatchType; // 属性匹配
+    speciesName: MatchType; // 种族匹配
+    starchip: MatchType; // 星级匹配
+    atk: MatchType; // 攻击力匹配
+    def: MatchType; // 防御力匹配
+    otherItemNameList: MatchType; // 类型匹配
+    penScale: MatchType; // 灵摆刻度匹配
+    linkMarkerCount: MatchType; // Link数量匹配
   };
 }
 

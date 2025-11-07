@@ -39,7 +39,8 @@ async function fetchAllCardsFromRemote() {
               effectList: [],
               exclusionList: [],
               keyword: "",
-              keywordLang: "none",
+              lang: "cn",
+              keywordLang: "cn",
               linkCondition: "1",
               linkMarkerList: [],
               mode: "1",
@@ -62,9 +63,10 @@ async function fetchAllCardsFromRemote() {
         if (
           response.data &&
           response.data.result &&
-          response.data.result.code === 200000 &&
+          (response.data.result.code === 200000 || response.data.result.code === "200000") &&
           response.data.response &&
-          response.data.response.cardList
+          response.data.response.cardList &&
+          Array.isArray(response.data.response.cardList)
         ) {
           const cards = response.data.response.cardList;
           const total = response.data.response.total;
@@ -87,6 +89,7 @@ async function fetchAllCardsFromRemote() {
           }
         } else {
           console.error("   ❌ 数据格式错误");
+          console.error("   📝 实际响应:", JSON.stringify(response.data, null, 2).substring(0, 1000));
           hasMore = false;
         }
       } catch (error) {
@@ -121,8 +124,12 @@ async function importCards(cards) {
 
     for (const cardData of cards) {
       try {
-        // 使用 upsert（存在则更新，不存在则插入）
-        const [card, created] = await CardCN.upsert({
+        // 检查是否已存在（通过 cardId 判断）
+        const existingCard = await CardCN.findOne({
+          where: { cardId: cardData.cardId }
+        });
+
+        const cardInfo = {
           cardId: cardData.cardId,
           lang: cardData.lang || "cn",
           cardName: cardData.cardName,
@@ -142,12 +149,16 @@ async function importCards(cards) {
           imageId: cardData.imageId,
           imageKey: cardData.imageKey,
           lots: cardData.lots,
-        });
+        };
 
-        if (created) {
-          imported++;
-        } else {
+        if (existingCard) {
+          // 更新现有记录
+          await existingCard.update(cardInfo);
           updated++;
+        } else {
+          // 创建新记录（id 自动递增）
+          await CardCN.create(cardInfo);
+          imported++;
         }
 
         if ((imported + updated) % 500 === 0) {

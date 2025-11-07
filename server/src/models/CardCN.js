@@ -3,9 +3,15 @@ const { sequelize } = require('../config/database');
 
 const CardCN = sequelize.define('CardCN', {
   // 基础信息
-  cardId: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
+    autoIncrement: true,
+    allowNull: false,
+    comment: 'ID'
+  },
+  cardId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
     comment: '卡片 ID'
   },
@@ -116,13 +122,13 @@ const CardCN = sequelize.define('CardCN', {
   timestamps: true,
   indexes: [
     {
+      fields: ['id']
+    },
+    {
       fields: ['cardId']
     },
     {
       fields: ['cardName']
-    },
-    {
-      fields: ['lang']
     },
     {
       fields: ['attributeName']

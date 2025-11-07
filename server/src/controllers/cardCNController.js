@@ -1,4 +1,4 @@
-const Card = require('../models/Card');
+const CardCN = require('../models/CardCN');
 const { Op } = require('sequelize');
 
 /**
@@ -9,35 +9,58 @@ exports.searchCards = async (req, res) => {
     // 支持从 query 或 body 获取参数
     const params = req.body.params || req.query;
     const {
-      keyword = '',
       page = 1,
       pageSize = 10,
-      type,
-      attribute,
-      race,
-      level,
+      keyword = '',
+      cardld,
+      lang,
+      cardName,
+      cardText,
       atk,
-      def
+      def,
+      attributeName,
+      speciesName,
+      starchip,
+      effectName,
+      otherltemNameList,
+      otherltemlcon,
+      penScale,
+      pendulumText,
+      linkMarker,
+      linkMarkerCount,
+      imageld,
+      imageKey,
+      lots,
+      createdAt,
+      updatedAt,
     } = params;
 
     // 构建查询条件
     const where = {};
 
-    // 关键词搜索（支持中英文）
+    // 关键词搜索
     if (keyword) {
       where[Op.or] = [
-        { name: { [Op.like]: `%${keyword}%` } },
-        { nameCN: { [Op.like]: `%${keyword}%` } },
-        { desc: { [Op.like]: `%${keyword}%` } },
-        { descCN: { [Op.like]: `%${keyword}%` } }
+        { cardId: { [Op.like]: `%${keyword}%` } },
+        { cardName: { [Op.like]: `%${keyword}%` } },
+        { attributeName: { [Op.like]: `%${keyword}%` } },
+        { starchip: { [Op.like]: `%${keyword}%` } }
       ];
     }
 
     // 精确匹配条件
-    if (type) where.type = type;
-    if (attribute) where.attribute = attribute;
-    if (race) where.race = race;
-    if (level) where.level = parseInt(level);
+    if (cardld) where.cardld = parseInt(cardld);
+    if (lang) where.lang = lang;
+    if (cardName) where.cardName = cardName;
+    if (cardText) where.cardText = { [Op.like]: `%${cardText}%` };
+    if (pendulumText) where.pendulumText = { [Op.like]: `%${pendulumText}%` };
+    if (attributeName) where.attributeName = attributeName;
+    if (speciesName) where.speciesName = speciesName;
+    if (penScale) where.penScale = parseInt(penScale);
+    if (linkMarker) where.linkMarker = linkMarker;
+    if (linkMarkerCount) where.linkMarkerCount = parseInt(linkMarkerCount);
+    if (starchip) where.starchip = parseInt(starchip);
+    if (imageld) where.imageld = parseInt(imageld);
     if (atk !== undefined) where.atk = parseInt(atk);
     if (def !== undefined) where.def = parseInt(def);
 
@@ -46,7 +69,7 @@ exports.searchCards = async (req, res) => {
     const limit = parseInt(pageSize);
 
     // 执行查询
-    const { count, rows } = await Card.findAndCountAll({
+    const { count, rows } = await CardCN.findAndCountAll({
       where,
       offset,
       limit,
@@ -88,7 +111,7 @@ exports.searchCards = async (req, res) => {
 exports.getCardById = async (req, res) => {
   try {
     const { id } = req.params;
-    const card = await Card.findOne({ where: { id: parseInt(id) } });
+    const card = await CardCN.findOne({ where: { id: parseInt(id) } });
 
     if (!card) {
       return res.status(404).json({
@@ -104,10 +127,6 @@ exports.getCardById = async (req, res) => {
     res.json({
       code: 200,
       message: 'SUCCESS',
-      result: {
-        code: 200,
-        message: 'TRUE'
-      },
       response: {
         card
       }
@@ -136,7 +155,7 @@ exports.getAllCards = async (req, res) => {
     const offset = (parseInt(page) - 1) * parseInt(pageSize);
     const limit = parseInt(pageSize);
 
-    const { count, rows } = await Card.findAndCountAll({
+    const { count, rows } = await CardCN.findAndCountAll({
       offset,
       limit,
       order: [['id', 'ASC']]
@@ -176,29 +195,12 @@ exports.getAllCards = async (req, res) => {
  */
 exports.getStats = async (req, res) => {
   try {
-    const totalCards = await Card.count();
-    const monsterCards = await Card.count({
-      where: { type: { [Op.like]: '%Monster%' } }
-    });
-    const spellCards = await Card.count({
-      where: { type: 'Spell Card' }
-    });
-    const trapCards = await Card.count({
-      where: { type: 'Trap Card' }
-    });
-
+    const totalCards = await CardCN.count();
     res.json({
       code: 200,
       message: 'SUCCESS',
-      result: {
-        code: 200,
-        message: 'TRUE'
-      },
       response: {
         total: totalCards,
-        monsters: monsterCards,
-        spells: spellCards,
-        traps: trapCards
       }
     });
 

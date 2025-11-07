@@ -1,7 +1,7 @@
-import { paths } from "@/options/zeus/ruoyiOrderCenter";
+import { paths } from "@/options/zeus/ruoyiCardCenter";
 import { extend } from "lodash";
 // post接口入参的类型定义
-export type ruoyiOrderCenterRequest<
+export type ruoyiCardCenterRequest<
   Path extends keyof paths,
   Method extends keyof paths[Path] = "post"
 > = paths[Path][Method] extends {
@@ -15,7 +15,7 @@ export type ruoyiOrderCenterRequest<
   : never;
 
 // post接口返回参数的类型定义
-export type ruoyiOrderCenterResponse<
+export type ruoyiCardCenterResponse<
   Path extends keyof paths,
   Method extends keyof paths[Path] = "post"
 > = paths[Path][Method] extends {
@@ -31,7 +31,7 @@ export type ruoyiOrderCenterResponse<
   : never;
 
 // get接口返回列表类型定义
-export type ruoyiOrderCenterGetRequest<
+export type ruoyiCardCenterGetRequest<
   Path extends keyof paths,
   Method extends keyof paths[Path] = "get",
   ParamName extends GetQueryKeys<Path, Method> = GetQueryKeys<Path, Method>
@@ -46,7 +46,7 @@ export type ruoyiOrderCenterGetRequest<
   : never;
 
 // get接口返回参数的类型定义
-export type ruoyiOrderCenterGetResponse<
+export type ruoyiCardCenterGetResponse<
   Path extends keyof paths,
   Method extends keyof paths[Path] = "get"
 > = paths[Path][Method] extends {

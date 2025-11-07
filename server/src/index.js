@@ -6,6 +6,7 @@ const { connectDB } = require('./config/database');
 const logger = require('./middleware/logger');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const cardRoutes = require('./routes/cards');
+const cardCNRoutes = require('./routes/cardsCN');
 
 // 创建 Express 应用
 const app = express();
@@ -35,6 +36,7 @@ app.get('/health', (req, res) => {
 
 // API 路由
 app.use('/konami', cardRoutes);
+app.use('/konami', cardCNRoutes);
 
 // 首页
 app.get('/', (req, res) => {
