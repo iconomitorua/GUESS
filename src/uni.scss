@@ -109,19 +109,27 @@ $uni-font-size-paragraph: 15px;
   }
 }
 
-@function calculateWidth() {
-}
+@function calculateWidth() {}
+
 @mixin flex() {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
+@mixin flex_between() {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @mixin imageFlex($width, $height) {
   width: $width;
   height: $height;
   display: flex;
   justify-content: center;
   align-items: center;
+
   image {
     width: 100%;
     height: 100%;
@@ -130,4 +138,5 @@ $uni-font-size-paragraph: 15px;
     align-items: center;
   }
 }
+
 $themeColor: #cd1800; //新的主题色

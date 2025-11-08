@@ -3,7 +3,8 @@ export interface YugiohCard {
   id: number;
   cardId: number; // 卡片ID
   cardName: string; // 卡片名称
-  attributeName: string; // 属性（光属性、暗属性、水属性等）
+  cardType: string; // 卡片类型（怪兽、魔法、陷阱）
+  attributeName: string; // 属性（光属性、暗属性、水属性等 / 魔法陷阱的速攻、永续等）
   speciesName: string[]; // 种族（龙族、战士族等）
   starchip: number; // 星级/等级
   atk: number; // 攻击力
@@ -21,7 +22,7 @@ export type Pokemon = YugiohCard;
 
 // 猜测记录
 export interface GuessRecord {
-  pokemon: YugiohCard;
+  cardInfo: YugiohCard;
   matches: {
     attributeName: MatchType; // 属性匹配
     speciesName: MatchType; // 种族匹配
