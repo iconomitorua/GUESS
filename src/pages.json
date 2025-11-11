@@ -72,6 +72,13 @@
             "navigationBarTitleText": "选择角色",
             "navigationBarBackgroundColor": "#ffffff"
           }
+        },
+        {
+          "path": "cardList/index",
+          "style": {
+            "navigationBarTitleText": "卡片列表",
+            "navigationStyle": "custom"
+          }
         }
       ]
     }

@@ -2,323 +2,155 @@
   <view class="query-page">
     <!-- 顶部搜索区 -->
     <view class="search-header">
-      <view class="search-row">
-        <view class="search-input-wrapper">
-          <u-input
-            v-model="searchKeyword"
-            placeholder="请输入关键字"
-            :clearable="true"
-            :border="true"
-            shape="circle"
-          >
-            <template #suffix>
-              <u-icon name="close-circle-fill" v-if="searchKeyword" @click="searchKeyword = ''" color="#c0c4cc"></u-icon>
-            </template>
-          </u-input>
-        </view>
-        <view class="search-selects">
-          <u-button
-            :type="searchLang === '0' ? 'primary' : 'default'"
-            size="small"
-            @click="searchLang = '0'"
-            shape="circle"
-          >
-            搜索语言
-          </u-button>
-          <u-button
-            :type="searchType === '1' ? 'primary' : 'default'"
-            size="small"
-            @click="searchType = '1'"
-            shape="circle"
-          >
-            搜索卡名
-          </u-button>
-        </view>
-        <u-button
-          type="warning"
-          size="small"
-          @click="handleSearch"
-          shape="circle"
-          icon="search"
-        >
-          搜索
-        </u-button>
+      <view class="search-title">卡片查询</view>
+
+      <!-- 关键词搜索 -->
+      <view class="search-box">
+        <u-input v-model="searchKeyword" placeholder="请输入卡片名称关键词..." :clearable="true" :border="true" shape="circle">
+        </u-input>
       </view>
 
-      <!-- 按精确筛选条件检索 -->
-      <view class="filter-tip">
-        <text class="tip-text">按精确筛选条件检索</text>
-        <u-icon name="arrow-down" size="24"></u-icon>
-      </view>
-    </view>
-
-    <!-- 标签页 -->
-    <view class="tabs-wrapper">
-      <view class="tabs">
-        <view
-          v-for="(tab, index) in tabs"
-          :key="index"
-          :class="['tab-item', { 'active': activeTab === index }]"
-          @click="activeTab = index"
-        >
-          {{ tab }}
-        </view>
-      </view>
+      <u-button type="primary" size="large" @click="handleSearch" shape="circle" :custom-style="{ marginTop: '20rpx' }">
+        <u-icon name="search" size="28" color="#fff"></u-icon>
+        <text style="margin-left: 10rpx;">搜索</text>
+      </u-button>
     </view>
 
     <!-- 筛选条件区域 -->
     <scroll-view class="filter-container" scroll-y>
-      <!-- 属性 -->
+      <!-- 卡片类型 -->
       <view class="filter-section">
+        <view class="filter-header">
+          <text class="filter-label">卡片类型</text>
+          <text class="clear-btn" @click="clearCardType">清除</text>
+        </view>
+        <view class="filter-options">
+          <view v-for="(type, index) in cardTypes" :key="index"
+            :class="['option-btn', { 'selected': selectedCardType === type }]" @click="selectedCardType = type">
+            {{ type }}
+          </view>
+        </view>
+      </view>
+
+      <!-- 属性筛选（怪兽卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '怪兽'">
         <view class="filter-header">
           <text class="filter-label">属性</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearAttribute"></u-icon>
-          </view>
+          <text class="clear-btn" @click="clearAttribute">清除</text>
         </view>
         <view class="filter-options">
-          <view
-            v-for="(attr, index) in attributes"
-            :key="index"
-            :class="['option-btn', { 'selected': selectedAttributes.includes(attr) }]"
-            @click="toggleAttribute(attr)"
-          >
-            <image v-if="attr.icon" :src="attr.icon" class="attr-icon" mode="aspectFit"></image>
-            <text>{{ attr.name }}</text>
+          <view v-for="(attr, index) in attributes" :key="index"
+            :class="['option-btn', { 'selected': selectedAttribute === attr }]" @click="selectedAttribute = attr">
+            {{ attr }}
           </view>
         </view>
       </view>
 
-      <!-- 效果 -->
-      <view class="filter-section">
-        <view class="filter-header">
-          <text class="filter-label">效果</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearEffects"></u-icon>
-          </view>
-        </view>
-        <view class="filter-options">
-          <view
-            v-for="(effect, index) in effects"
-            :key="index"
-            :class="['option-btn', { 'selected': selectedEffects.includes(effect) }]"
-            @click="toggleEffect(effect)"
-          >
-            <image v-if="effect.icon" :src="effect.icon" class="effect-icon" mode="aspectFit"></image>
-            <text>{{ effect.name }}</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 种族 -->
-      <view class="filter-section">
+      <!-- 种族筛选（怪兽卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '怪兽'">
         <view class="filter-header">
           <text class="filter-label">种族</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearSpecies"></u-icon>
-          </view>
+          <text class="clear-btn" @click="clearSpecies">清除</text>
         </view>
         <view class="filter-options species-grid">
-          <view
-            v-for="(species, index) in speciesList"
-            :key="index"
-            :class="['option-btn', { 'selected': selectedSpecies.includes(species) }]"
-            @click="toggleSpecies(species)"
-          >
+          <view v-for="(species, index) in speciesList" :key="index"
+            :class="['option-btn', { 'selected': selectedSpecies === species }]" @click="selectedSpecies = species">
             {{ species }}
           </view>
         </view>
       </view>
 
-      <!-- 其他项目 -->
-      <view class="filter-section">
+      <!-- 怪兽类型筛选（怪兽卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '怪兽'">
         <view class="filter-header">
-          <text class="filter-label">其他项目</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearOtherItems"></u-icon>
-          </view>
-        </view>
-        <view class="toggle-group">
-          <view class="toggle-item">
-            <text>and</text>
-            <radio :checked="otherCondition === 'and'" @click="otherCondition = 'and'"></radio>
-          </view>
-          <view class="toggle-item">
-            <text>or</text>
-            <radio :checked="otherCondition === 'or'" @click="otherCondition = 'or'"></radio>
-          </view>
+          <text class="filter-label">怪兽类型</text>
+          <text class="clear-btn" @click="clearMonsterType">清除</text>
         </view>
         <view class="filter-options">
-          <view
-            v-for="(item, index) in otherItems"
-            :key="index"
-            :class="['option-btn', { 'selected': selectedOtherItems.includes(item) }]"
-            @click="toggleOtherItem(item)"
-          >
-            {{ item }}
+          <view v-for="(type, index) in monsterTypes" :key="index"
+            :class="['option-btn', { 'selected': selectedMonsterTypes.includes(type) }]"
+            @click="toggleMonsterType(type)">
+            {{ type }}
           </view>
         </view>
       </view>
 
-      <!-- 除外项目 -->
-      <view class="filter-section">
+      <!-- 魔法类型筛选（魔法卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '魔法'">
         <view class="filter-header">
-          <text class="filter-label">除外项目</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearExclusions"></u-icon>
-          </view>
-        </view>
-        <view class="toggle-group">
-          <view class="toggle-item">
-            <text>and</text>
-            <radio :checked="exclusionCondition === 'and'" @click="exclusionCondition = 'and'"></radio>
-          </view>
-          <view class="toggle-item">
-            <text>or</text>
-            <radio :checked="exclusionCondition === 'or'" @click="exclusionCondition = 'or'"></radio>
-          </view>
+          <text class="filter-label">魔法类型</text>
+          <text class="clear-btn" @click="clearSpellType">清除</text>
         </view>
         <view class="filter-options">
-          <view
-            v-for="(item, index) in exclusionItems"
-            :key="index"
-            :class="['option-btn', { 'selected': selectedExclusions.includes(item) }]"
-            @click="toggleExclusion(item)"
-          >
-            {{ item }}
+          <view v-for="(type, index) in spellTypes" :key="index"
+            :class="['option-btn', { 'selected': selectedSpellType === type }]" @click="selectedSpellType = type">
+            {{ type }}
           </view>
         </view>
       </view>
 
-      <!-- 等级/阶级 -->
-      <view class="filter-section">
+      <!-- 陷阱类型筛选（陷阱卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '陷阱'">
         <view class="filter-header">
-          <text class="filter-label">等级/阶级</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearStars"></u-icon>
+          <text class="filter-label">陷阱类型</text>
+          <text class="clear-btn" @click="clearTrapType">清除</text>
+        </view>
+        <view class="filter-options">
+          <view v-for="(type, index) in trapTypes" :key="index"
+            :class="['option-btn', { 'selected': selectedTrapType === type }]" @click="selectedTrapType = type">
+            {{ type }}
           </view>
+        </view>
+      </view>
+
+      <!-- 星级/阶级筛选（怪兽卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '怪兽'">
+        <view class="filter-header">
+          <text class="filter-label">星级/阶级</text>
+          <text class="clear-btn" @click="clearStars">清除</text>
         </view>
         <view class="number-options">
-          <view
-            v-for="num in 14"
-            :key="num - 1"
-            :class="['number-btn', { 'selected': selectedStars.includes(num - 1) }]"
-            @click="toggleStar(num - 1)"
-          >
-            {{ num - 1 }}
+          <view v-for="num in 13" :key="num" :class="['number-btn', { 'selected': selectedStar === num }]"
+            @click="selectedStar = num">
+            {{ num }}
           </view>
         </view>
       </view>
 
-      <!-- 灵摆刻度 -->
-      <view class="filter-section">
+      <!-- 攻击力筛选（怪兽卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '怪兽'">
         <view class="filter-header">
-          <text class="filter-label">灵摆刻度</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearPenScale"></u-icon>
-          </view>
+          <text class="filter-label">攻击力范围</text>
         </view>
-        <view class="number-options">
-          <view
-            v-for="num in 14"
-            :key="num - 1"
-            :class="['number-btn', { 'selected': selectedPenScale.includes(num - 1) }]"
-            @click="togglePenScale(num - 1)"
-          >
-            {{ num - 1 }}
-          </view>
+        <view class="range-inputs">
+          <u-input v-model="atkMin" type="number" placeholder="最小值" :border="true"></u-input>
+          <text class="range-separator">~</text>
+          <u-input v-model="atkMax" type="number" placeholder="最大值" :border="true"></u-input>
         </view>
       </view>
 
-      <!-- 连接 -->
-      <view class="filter-section">
+      <!-- 守备力筛选（怪兽卡时显示） -->
+      <view class="filter-section" v-if="selectedCardType === '怪兽'">
         <view class="filter-header">
-          <text class="filter-label">连接</text>
-          <view class="filter-tools">
-            <u-icon name="question-circle" size="32" color="#ff9900"></u-icon>
-            <u-icon name="close-circle" size="32" color="#ff0000" @click="clearLinks"></u-icon>
-          </view>
+          <text class="filter-label">守备力范围</text>
         </view>
-        <view class="link-container">
-          <view class="number-options link-numbers">
-            <view
-              v-for="num in 6"
-              :key="num"
-              :class="['number-btn', { 'selected': selectedLinks.includes(num) }]"
-              @click="toggleLink(num)"
-            >
-              {{ num }}
-            </view>
-          </view>
-          <view class="link-direction">
-            <view class="direction-grid">
-              <!-- 9宫格方向选择 -->
-              <view
-                v-for="(dir, index) in linkDirections"
-                :key="index"
-                :class="['direction-btn', { 'selected': selectedDirections.includes(dir.value), 'center': dir.value === 'center' }]"
-                @click="toggleDirection(dir.value)"
-              >
-              </view>
-            </view>
-            <view class="toggle-group direction-toggle">
-              <view class="toggle-item">
-                <text>and</text>
-                <radio :checked="linkCondition === 'and'" @click="linkCondition = 'and'"></radio>
-              </view>
-              <view class="toggle-item">
-                <text>or</text>
-                <radio :checked="linkCondition === 'or'" @click="linkCondition = 'or'"></radio>
-              </view>
-            </view>
-          </view>
+        <view class="range-inputs">
+          <u-input v-model="defMin" type="number" placeholder="最小值" :border="true"></u-input>
+          <text class="range-separator">~</text>
+          <u-input v-model="defMax" type="number" placeholder="最大值" :border="true"></u-input>
         </view>
       </view>
 
-      <!-- 攻击力/守备力 -->
-      <view class="filter-section atk-def-section">
-        <view class="stat-inputs">
-          <view class="stat-group">
-            <text class="stat-label">攻击力</text>
-            <view class="stat-input-row">
-              <u-input
-                v-model="atkFrom"
-                type="number"
-                placeholder=""
-                :border="true"
-              ></u-input>
-            </view>
-          </view>
-          <view class="stat-group">
-            <text class="stat-label">守备力</text>
-            <view class="stat-input-row">
-              <u-input
-                v-model="defFrom"
-                type="number"
-                placeholder=""
-                :border="true"
-              ></u-input>
-            </view>
-          </view>
-        </view>
-      </view>
+      <!-- 底部占位 -->
+      <view style="height: 100rpx;"></view>
     </scroll-view>
 
-    <!-- 底部搜索按钮 -->
-    <view class="bottom-search">
-      <u-button
-        type="warning"
-        size="large"
-        @click="handleSearch"
-        shape="circle"
-      >
+    <!-- 底部按钮组 -->
+    <view class="bottom-actions">
+      <u-button type="info" size="large" @click="resetAll" shape="circle" plain>
+        重置
+      </u-button>
+      <u-button type="warning" size="large" @click="handleSearch" shape="circle">
         搜索
       </u-button>
     </view>
@@ -327,212 +159,158 @@
 
 <script lang="ts">
 import Vue from "vue";
+
 export default Vue.extend({
   data() {
     return {
-      // 搜索相关
+      // 关键词搜索
       searchKeyword: '',
-      searchLang: '0',
-      searchType: '1',
 
-      // 标签页
-      activeTab: 0,
-      tabs: ['所有卡', '怪兽卡', '魔法卡', '陷阱卡'],
+      // 卡片类型
+      cardTypes: ['全部', '怪兽', '魔法', '陷阱'],
+      selectedCardType: '全部',
 
       // 属性
-      attributes: [
-        { name: '暗属性', icon: '' },
-        { name: '光属性', icon: '' },
-        { name: '地属性', icon: '' },
-        { name: '水属性', icon: '' },
-        { name: '炎属性', icon: '' },
-        { name: '风属性', icon: '' },
-        { name: '神属性', icon: '' },
-      ],
-      selectedAttributes: [] as any[],
-
-      // 效果
-      effects: [
-        { name: '装备', icon: '' },
-        { name: '场地', icon: '' },
-        { name: '速攻', icon: '' },
-        { name: '仪式', icon: '' },
-        { name: '永续', icon: '' },
-        { name: '反击', icon: '' },
-        { name: '通常', icon: '' },
-      ],
-      selectedEffects: [] as any[],
+      attributes: ['暗属性', '光属性', '地属性', '水属性', '炎属性', '风属性', '神属性'],
+      selectedAttribute: '',
 
       // 种族
       speciesList: [
         '魔法师族', '龙族', '不死族', '战士族', '兽战士族', '兽族', '鸟兽族',
         '恶魔族', '天使族', '昆虫族', '岩石族', '机械族', '恐龙族',
         '水族', '炎族', '雷族', '植物族', '电子界族', '幻龙族',
-        '幻神兽族', '创造神族', '幻龙族', '电子界族', '恐动力族'
+        '幻神兽族', '创造神族', '恐动力族'
       ],
-      selectedSpecies: [] as string[],
+      selectedSpecies: '',
 
-      // 其他项目
-      otherCondition: 'and',
-      otherItems: ['通常', '效果', '仪式', '融合', '同步', '超量', '灵摆', '连接', '卡通', '特殊召唤'],
-      selectedOtherItems: [] as string[],
+      // 怪兽类型
+      monsterTypes: ['通常', '效果', '仪式', '融合', '同步', '超量', '灵摆', '连接'],
+      selectedMonsterTypes: [] as string[],
 
-      // 除外项目
-      exclusionCondition: 'and',
-      exclusionItems: ['通常', '效果', '仪式', '融合', '同步', '超量', '灵摆', '连接', '卡通', '特殊召唤'],
-      selectedExclusions: [] as string[],
+      // 魔法类型
+      spellTypes: ['通常', '速攻', '永续', '装备', '场地', '仪式'],
+      selectedSpellType: '',
 
-      // 等级
-      selectedStars: [] as number[],
+      // 陷阱类型
+      trapTypes: ['通常', '永续', '反击'],
+      selectedTrapType: '',
 
-      // 灵摆刻度
-      selectedPenScale: [] as number[],
-
-      // 连接
-      selectedLinks: [] as number[],
-      linkCondition: 'or',
-      linkDirections: [
-        { value: 'tl' }, { value: 't' }, { value: 'tr' },
-        { value: 'l' }, { value: 'center' }, { value: 'r' },
-        { value: 'bl' }, { value: 'b' }, { value: 'br' },
-      ],
-      selectedDirections: [] as string[],
+      // 星级
+      selectedStar: 0,
 
       // 攻守
-      atkFrom: '',
-      atkTo: '',
-      defFrom: '',
-      defTo: '',
+      atkMin: '',
+      atkMax: '',
+      defMin: '',
+      defMax: '',
     };
   },
   methods: {
-    // 属性相关
-    toggleAttribute(attr: any) {
-      const index = this.selectedAttributes.findIndex(a => a.name === attr.name);
+    // 切换怪兽类型（多选）
+    toggleMonsterType(type: string) {
+      const index = this.selectedMonsterTypes.indexOf(type);
       if (index > -1) {
-        this.selectedAttributes.splice(index, 1);
+        this.selectedMonsterTypes.splice(index, 1);
       } else {
-        this.selectedAttributes.push(attr);
+        this.selectedMonsterTypes.push(type);
       }
+    },
+
+    // 清除方法
+    clearCardType() {
+      this.selectedCardType = '全部';
     },
     clearAttribute() {
-      this.selectedAttributes = [];
-    },
-
-    // 效果相关
-    toggleEffect(effect: any) {
-      const index = this.selectedEffects.findIndex(e => e.name === effect.name);
-      if (index > -1) {
-        this.selectedEffects.splice(index, 1);
-      } else {
-        this.selectedEffects.push(effect);
-      }
-    },
-    clearEffects() {
-      this.selectedEffects = [];
-    },
-
-    // 种族相关
-    toggleSpecies(species: string) {
-      const index = this.selectedSpecies.indexOf(species);
-      if (index > -1) {
-        this.selectedSpecies.splice(index, 1);
-      } else {
-        this.selectedSpecies.push(species);
-      }
+      this.selectedAttribute = '';
     },
     clearSpecies() {
-      this.selectedSpecies = [];
+      this.selectedSpecies = '';
     },
-
-    // 其他项目
-    toggleOtherItem(item: string) {
-      const index = this.selectedOtherItems.indexOf(item);
-      if (index > -1) {
-        this.selectedOtherItems.splice(index, 1);
-      } else {
-        this.selectedOtherItems.push(item);
-      }
+    clearMonsterType() {
+      this.selectedMonsterTypes = [];
     },
-    clearOtherItems() {
-      this.selectedOtherItems = [];
+    clearSpellType() {
+      this.selectedSpellType = '';
     },
-
-    // 除外项目
-    toggleExclusion(item: string) {
-      const index = this.selectedExclusions.indexOf(item);
-      if (index > -1) {
-        this.selectedExclusions.splice(index, 1);
-      } else {
-        this.selectedExclusions.push(item);
-      }
-    },
-    clearExclusions() {
-      this.selectedExclusions = [];
-    },
-
-    // 等级
-    toggleStar(num: number) {
-      const index = this.selectedStars.indexOf(num);
-      if (index > -1) {
-        this.selectedStars.splice(index, 1);
-      } else {
-        this.selectedStars.push(num);
-      }
+    clearTrapType() {
+      this.selectedTrapType = '';
     },
     clearStars() {
-      this.selectedStars = [];
+      this.selectedStar = 0;
     },
 
-    // 灵摆刻度
-    togglePenScale(num: number) {
-      const index = this.selectedPenScale.indexOf(num);
-      if (index > -1) {
-        this.selectedPenScale.splice(index, 1);
-      } else {
-        this.selectedPenScale.push(num);
-      }
-    },
-    clearPenScale() {
-      this.selectedPenScale = [];
-    },
+    // 重置所有筛选条件
+    resetAll() {
+      this.searchKeyword = '';
+      this.selectedCardType = '全部';
+      this.selectedAttribute = '';
+      this.selectedSpecies = '';
+      this.selectedMonsterTypes = [];
+      this.selectedSpellType = '';
+      this.selectedTrapType = '';
+      this.selectedStar = 0;
+      this.atkMin = '';
+      this.atkMax = '';
+      this.defMin = '';
+      this.defMax = '';
 
-    // 连接
-    toggleLink(num: number) {
-      const index = this.selectedLinks.indexOf(num);
-      if (index > -1) {
-        this.selectedLinks.splice(index, 1);
-      } else {
-        this.selectedLinks.push(num);
-      }
-    },
-    toggleDirection(dir: string) {
-      if (dir === 'center') return;
-      const index = this.selectedDirections.indexOf(dir);
-      if (index > -1) {
-        this.selectedDirections.splice(index, 1);
-      } else {
-        this.selectedDirections.push(dir);
-      }
-    },
-    clearLinks() {
-      this.selectedLinks = [];
-      this.selectedDirections = [];
+      uni.showToast({
+        title: '已重置',
+        icon: 'success'
+      });
     },
 
     // 搜索
     handleSearch() {
-      console.log('搜索参数:', {
-        keyword: this.searchKeyword,
-        attributes: this.selectedAttributes,
-        effects: this.selectedEffects,
-        species: this.selectedSpecies,
-        // ... 其他筛选条件
-      });
+      // 构建搜索参数
+      const params: any = {
+        keyword: this.searchKeyword || undefined,
+      };
 
-      uni.showToast({
-        title: '搜索功能开发中',
-        icon: 'none'
+      // 根据卡片类型添加条件
+      if (this.selectedCardType !== '全部') {
+        if (this.selectedCardType === '怪兽') {
+          // 怪兽卡筛选
+          if (this.selectedAttribute) {
+            params.attributeName = this.selectedAttribute;
+          }
+          if (this.selectedSpecies) {
+            params.speciesName = this.selectedSpecies;
+          }
+          if (this.selectedMonsterTypes.length > 0) {
+            params.otherItemName = this.selectedMonsterTypes.join(',');
+          }
+          if (this.selectedStar > 0) {
+            params.starchip = this.selectedStar;
+          }
+          if (this.atkMin) {
+            params.atkMin = this.atkMin;
+          }
+          if (this.atkMax) {
+            params.atkMax = this.atkMax;
+          }
+          if (this.defMin) {
+            params.defMin = this.defMin;
+          }
+          if (this.defMax) {
+            params.defMax = this.defMax;
+          }
+        } else if (this.selectedCardType === '魔法') {
+          params.attributeName = '魔法';
+          if (this.selectedSpellType) {
+            params.effectName = this.selectedSpellType;
+          }
+        } else if (this.selectedCardType === '陷阱') {
+          params.attributeName = '陷阱';
+          if (this.selectedTrapType) {
+            params.effectName = this.selectedTrapType;
+          }
+        }
+      }
+
+      // 跳转到列表页
+      uni.navigateTo({
+        url: `/pages-mall/cardList/index?params=${encodeURIComponent(JSON.stringify(params))}`
       });
     }
   }
@@ -541,7 +319,7 @@ export default Vue.extend({
 
 <style lang="scss">
 page {
-  background: #f7f7f6;
+  background: #f5f7fa;
 }
 </style>
 
@@ -551,88 +329,33 @@ page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f7f7f6;
+  background: #f5f7fa;
   padding-bottom: 140rpx;
 }
 
 // 顶部搜索区
 .search-header {
-  background: #003366;
-  padding: 20rpx 24rpx;
-  padding-top: calc(20rpx + var(--status-bar-height));
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40rpx 30rpx;
+  padding-top: calc(40rpx + var(--status-bar-height));
 
-  .search-row {
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
-    margin-bottom: 20rpx;
-  }
-
-  .search-input-wrapper {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .search-selects {
-    display: flex;
-    gap: 12rpx;
-  }
-
-  .filter-tip {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12rpx;
-    padding: 16rpx 0;
-
-    .tip-text {
-      color: #ffffff;
-      font-size: 28rpx;
-    }
-  }
-}
-
-// 标签页
-.tabs-wrapper {
-  background: #ffffff;
-  border-bottom: 1rpx solid #e5e5e5;
-}
-
-.tabs {
-  display: flex;
-
-  .tab-item {
-    flex: 1;
+  .search-title {
+    font-size: 40rpx;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 30rpx;
     text-align: center;
-    padding: 28rpx 0;
-    font-size: 30rpx;
-    color: #666666;
-    position: relative;
-    transition: all 0.3s;
+  }
 
-    &.active {
-      color: #003366;
-      font-weight: bold;
-      background: linear-gradient(to bottom, #cccccc, #ffffff);
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60%;
-        height: 4rpx;
-        background: #003366;
-      }
-    }
+  .search-box {
+    margin-bottom: 20rpx;
   }
 }
 
 // 筛选容器
 .filter-container {
   flex: 1;
-  padding: 0 24rpx;
+  padding: 20rpx;
 }
 
 // 筛选区块
@@ -640,7 +363,7 @@ page {
   background: #ffffff;
   border-radius: 16rpx;
   padding: 24rpx;
-  margin-top: 20rpx;
+  margin-bottom: 20rpx;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
@@ -648,7 +371,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
 
   .filter-label {
     font-size: 30rpx;
@@ -656,27 +379,9 @@ page {
     color: #333333;
   }
 
-  .filter-tools {
-    display: flex;
-    gap: 24rpx;
-  }
-}
-
-// 切换组
-.toggle-group {
-  display: flex;
-  gap: 40rpx;
-  margin-bottom: 20rpx;
-  padding: 16rpx 24rpx;
-  background: #f5f5f5;
-  border-radius: 12rpx;
-
-  .toggle-item {
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-    font-size: 28rpx;
-    color: #666666;
+  .clear-btn {
+    font-size: 26rpx;
+    color: #667eea;
   }
 }
 
@@ -689,39 +394,29 @@ page {
 
 .option-btn {
   padding: 16rpx 28rpx;
-  background: #e8eaf0;
+  background: #f5f7fa;
   border: 2rpx solid transparent;
   border-radius: 12rpx;
   font-size: 26rpx;
   color: #333333;
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
   transition: all 0.3s;
 
   &.selected {
-    background: #003366;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #ffffff;
-    border-color: #003366;
     transform: scale(1.02);
   }
 
   &:active {
     transform: scale(0.98);
   }
-
-  .attr-icon,
-  .effect-icon {
-    width: 32rpx;
-    height: 32rpx;
-  }
 }
 
 // 种族网格
 .species-grid {
   .option-btn {
-    min-width: 160rpx;
-    justify-content: center;
+    min-width: 140rpx;
+    text-align: center;
   }
 }
 
@@ -738,7 +433,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #003366;
+  background: #667eea;
   color: #ffffff;
   border-radius: 12rpx;
   font-size: 32rpx;
@@ -746,7 +441,7 @@ page {
   transition: all 0.3s;
 
   &.selected {
-    background: #ff9900;
+    background: linear-gradient(135deg, #fa8c16 0%, #ff6b35 100%);
     transform: scale(1.05);
     box-shadow: 0 4rpx 12rpx rgba(255, 153, 0, 0.3);
   }
@@ -756,84 +451,27 @@ page {
   }
 }
 
-// 连接容器
-.link-container {
+// 范围输入
+.range-inputs {
   display: flex;
-  gap: 32rpx;
-  align-items: flex-start;
-}
-
-.link-numbers {
-  flex: 1;
-}
-
-.link-direction {
-  display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 20rpx;
-}
 
-.direction-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 100rpx);
-  grid-template-rows: repeat(3, 100rpx);
-  gap: 8rpx;
-  background: #8b7355;
-  padding: 16rpx;
-  border-radius: 16rpx;
-}
-
-.direction-btn {
-  background: #f0f0f0;
-  border: 3rpx solid #666666;
-  border-radius: 8rpx;
-  transition: all 0.3s;
-
-  &.center {
-    background: #8b7355;
-    border-color: #8b7355;
-  }
-
-  &.selected {
-    background: #003366;
-    border-color: #003366;
-  }
-
-  &:active:not(.center) {
-    transform: scale(0.95);
+  .range-separator {
+    font-size: 28rpx;
+    color: #999;
   }
 }
 
-.direction-toggle {
-  justify-content: center;
-}
-
-// 攻守区域
-.atk-def-section {
-  .stat-inputs {
-    display: flex;
-    gap: 32rpx;
-  }
-
-  .stat-group {
-    flex: 1;
-
-    .stat-label {
-      display: block;
-      font-size: 28rpx;
-      color: #666666;
-      margin-bottom: 16rpx;
-    }
-  }
-}
-
-// 底部搜索按钮
-.bottom-search {
+// 底部按钮组
+.bottom-actions {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 24rpx;
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 30rpx;
   background: #ffffff;
   box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
   z-index: 100;

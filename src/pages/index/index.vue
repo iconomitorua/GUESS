@@ -5,6 +5,7 @@
       <view class="navbar-content">
         <text class="navbar-title">游戏王猜谜</text>
         <view class="navbar-actions">
+          <u-icon name="reload" color="#fff" size="24" @click="reloadGame"></u-icon>
           <u-icon name="question-circle" color="#fff" size="24" @click="showTipModal = true"></u-icon>
           <u-icon name="setting" color="#fff" size="24" @click="showSettings"></u-icon>
         </view>
@@ -73,91 +74,100 @@
                 :src="`https://yxwdbapi.windoent.com/konami/getImageAction?type=1&ciid=1&cid=${record.cardInfo.cardId}&enc=${record.cardInfo.imageKey}&lang=cn`"
                 alt="">
               <view class="right">
-                <view class="card-tab">{{ switchCardType(record.cardInfo.attributeName) }}卡</view>
-                <view v-if="switchCardType(record.cardInfo.attributeName) === '怪兽'" class="monster-card">
-                  <view class="card-tab-box">
-                    <view class="card-tab">{{ record.cardInfo.attributeName }}</view>
-                    <view class="card-tab">{{ record.cardInfo.starchip }}</view>
+                <!-- 属性比较 -->
+                <view class="compare-item"
+                  v-if="record.cardInfo.attributeName !== '魔法' && record.cardInfo.attributeName !== '陷阱'">
+                  <text class="compare-label">属性:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.attributeName)]">
+                    {{ record.cardInfo.attributeName || '无' }}
                   </view>
                 </view>
-                <view v-else class="other-card"></view>
-              </view>
-            </view>
-          </view>
-
-          <!-- 卡片类型不同：只显示卡片名称和类型 -->
-          <view v-if="record.cardInfo.cardType !== answer.cardType" class="cardInfo-details">
-            <view class="detail-row">
-              <text class="detail-label">类型：</text>
-              <u-tag :text="record.cardInfo.cardType" type="info" size="default"></u-tag>
-            </view>
-          </view>
-
-          <!-- 卡片类型相同：显示详细信息 -->
-          <view v-else class="cardInfo-details">
-            <!-- 怪兽卡 -->
-            <view v-if="record.cardInfo.cardType === '怪兽'">
-              <!-- 星级 -->
-              <view class="detail-row" v-if="record.cardInfo.starchip != null">
-                <text class="detail-label">星级：</text>
-                <u-tag :text="`${record.cardInfo.starchip}星`" :type="getTagType(record.matches.starchip)"
-                  size="default"></u-tag>
-              </view>
-
-              <!-- 属性 -->
-              <view class="detail-row">
-                <text class="detail-label">属性：</text>
-                <u-tag :text="record.cardInfo.attributeName" :type="getTagType(record.matches.attributeName)"
-                  size="default"></u-tag>
-              </view>
-
-              <!-- 种族 -->
-              <view class="detail-row" v-if="record.cardInfo.speciesName && record.cardInfo.speciesName.length > 0">
-                <text class="detail-label">种族：</text>
-                <view class="tags-group">
-                  <u-tag v-for="(species, i) in record.cardInfo.speciesName" :key="i" :text="species"
-                    :type="getTagType(record.matches.speciesName)" size="default"></u-tag>
+                <!-- 种族比较 -->
+                <view class="compare-item" v-if="record.cardInfo.speciesName">
+                  <text class="compare-label">种族:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.speciesName)]">
+                    {{ record.cardInfo.speciesName }}
+                  </view>
                 </view>
-              </view>
 
-              <!-- 攻击力 -->
-              <view class="detail-row" v-if="record.cardInfo.atk != null">
-                <text class="detail-label">攻击力：</text>
-                <view class="atk-def-container">
-                  <u-tag :text="String(record.cardInfo.atk)" :type="getTagType(record.matches.atk)"
-                    size="default"></u-tag>
-                  <text v-if="getAtkDefArrow(record.cardInfo.atk, answer.atk)" class="arrow-indicator">
-                    {{ getAtkDefArrow(record.cardInfo.atk, answer.atk) }}
-                  </text>
+                <!-- 星级比较 -->
+                <view class="compare-item"
+                  v-if="record.cardInfo.starchip !== null && record.cardInfo.starchip !== undefined">
+                  <text class="compare-label">星级/阶级:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.starchip)]">
+                    {{ record.cardInfo.starchip }}
+                    <text v-if="answer.starchip && record.cardInfo.starchip !== answer.starchip"
+                      class="arrow-indicator">
+                      {{ getAtkDefArrow(record.cardInfo.starchip, answer.starchip) }}
+                    </text>
+                  </view>
                 </view>
-              </view>
 
-              <!-- 防御力 -->
-              <view class="detail-row" v-if="record.cardInfo.def != null">
-                <text class="detail-label">防御力：</text>
-                <view class="atk-def-container">
-                  <u-tag :text="String(record.cardInfo.def)" :type="getTagType(record.matches.def)"
-                    size="default"></u-tag>
-                  <text v-if="getAtkDefArrow(record.cardInfo.def, answer.def)" class="arrow-indicator">
-                    {{ getAtkDefArrow(record.cardInfo.def, answer.def) }}
-                  </text>
+                <!-- 攻击力比较 -->
+                <view class="compare-item" v-if="record.cardInfo.atk !== null && record.cardInfo.atk !== undefined">
+                  <text class="compare-label">攻击:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.atk)]">
+                    {{ record.cardInfo.atk < 0 ? 0 : record.cardInfo.atk }} <text
+                      v-if="answer.atk !== null && record.cardInfo.atk !== answer.atk" class="arrow-indicator">
+                      {{ getAtkDefArrow(record.cardInfo.atk, answer.atk) }}
+                      </text>
+                  </view>
                 </view>
-              </view>
-            </view>
 
-            <!-- 魔法/陷阱卡 -->
-            <view v-else>
-              <view class="detail-row">
-                <text class="detail-label">属性：</text>
-                <u-tag :text="record.cardInfo.attributeName" :type="getTagType(record.matches.attributeName)"
-                  size="default"></u-tag>
+                <!-- 防御力比较 -->
+                <view class="compare-item" v-if="record.cardInfo.def !== null && record.cardInfo.def !== undefined">
+                  <text class="compare-label">防御:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.def)]">
+                    {{ record.cardInfo.def < 0 ? 0 : record.cardInfo.def }} <text
+                      v-if="answer.def !== null && record.cardInfo.def !== answer.def" class="arrow-indicator">
+                      {{ getAtkDefArrow(record.cardInfo.def, answer.def) }}
+                      </text>
+                  </view>
+                </view>
+
+                <!-- 类型比较 -->
+                <view class="compare-item"
+                  v-if="record.cardInfo.otherItemNameList && record.cardInfo.otherItemNameList.length > 0">
+                  <text class="compare-label">类型:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.otherItemNameList)]">
+                    {{ record.cardInfo.otherItemNameList.join('、') }}
+                  </view>
+                </view>
+
+                <!-- 灵摆刻度比较 -->
+                <view class="compare-item"
+                  v-if="record.cardInfo.penScale !== null && record.cardInfo.penScale !== undefined">
+                  <text class="compare-label">灵摆:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.penScale)]">
+                    {{ record.cardInfo.penScale }}
+                  </view>
+                </view>
+
+                <!-- 连接数比较 -->
+                <view class="compare-item"
+                  v-if="record.cardInfo.linkMarkerCount !== null && record.cardInfo.linkMarkerCount !== undefined">
+                  <text class="compare-label">Link:</text>
+                  <view :class="['compare-value', getMatchClass(record.matches.linkMarkerCount)]">
+                    {{ record.cardInfo.linkMarkerCount }}
+                  </view>
+                </view>
+                <!-- 连接方位 -->
+                <view class="compare-item"
+                  v-if="record.cardInfo.linkMarker !== null && record.cardInfo.linkMarker !== undefined">
+                  <view class="direction-grid">
+                    <!-- 9宫格方向选择 -->
+                    <view v-for="(dir, index) in linkDirections" :key="index"
+                      :class="['direction-btn', { 'selected': record.cardInfo.linkMarker.includes(dir.value), 'center': dir.value === '5' }]">
+                    </view>
+                  </view>
+                </view>
               </view>
             </view>
           </view>
         </view>
       </view>
     </view>
-    <u-modal :show="showTipModal" :show-cancel-button="false" :show-confirm-button="false">
+    <u-modal :show="showTipModal" :show-cancel-button="false" :show-confirm-button="false" :closeOnClickOverlay="true">
       <view class="modal-content">
         <view class="tip-title">游戏提示:</view>
         <view class="tip-text">通过输入游戏王卡片名称进行猜测，找出目标卡片。每次猜测后，你将获得输入卡片的相关信息，帮助你逐步接近答案。</view>
@@ -174,7 +184,8 @@
       </view>
     </u-modal>
     <!-- 成功弹窗 -->
-    <u-modal :show="showSuccessModal" :show-cancel-button="false" :show-confirm-button="false">
+    <u-modal :show="showSuccessModal" :show-cancel-button="false" :show-confirm-button="false"
+      :closeOnClickOverlay="true">
       <view class="modal-content">
         <view class="modal-icon success">✅</view>
         <view class="modal-title">你获得了胜利！</view>
@@ -220,7 +231,7 @@
     </u-modal>
 
     <!-- 失败弹窗 -->
-    <u-modal :show="showFailModal" :show-cancel-button="false" :show-confirm-button="false">
+    <u-modal :show="showFailModal" :show-cancel-button="false" :show-confirm-button="false" :closeOnClickOverlay="true">
       <view class="modal-content">
         <view class="modal-icon fail">❌</view>
         <view class="modal-title">很遗憾，挑战失败！</view>
@@ -246,7 +257,8 @@
     </u-modal>
 
     <!-- 设置弹窗 -->
-    <u-modal :show="showSettingsModal" :show-cancel-button="false" :show-confirm-button="false">
+    <u-modal :show="showSettingsModal" :show-cancel-button="false" :show-confirm-button="false"
+      :closeOnClickOverlay="true">
       <view class="settings-content">
         <view class="settings-header">
           <text class="settings-title">设置</text>
@@ -294,7 +306,6 @@
 <script lang="ts">
 import Vue from "vue";
 import { Pokemon, GuessRecord, MatchType } from "./data";
-import { getRandomPokemon, searchPokemonByName, pokemonDatabase } from "./server";
 import service from "@/api/index";
 import { CardInput } from "@/api/data";
 export default Vue.extend({
@@ -310,10 +321,13 @@ export default Vue.extend({
       showFailModal: false,
       showSettingsModal: false,
       showSuggestions: false,
+      selected: false,
+      hasScreening: false,
       filteredPokemonList: [] as Pokemon[],
       lock: false,
       currentCard: {} as any,
       callbackIndex: 0,
+      totalNum: 0,
       // 设置项
       selectedCardType: "怪兽", // 魔法、陷阱、怪兽
       selectedMonsterType: "全部", // 全部、效果、通常、特殊召唤等
@@ -325,10 +339,7 @@ export default Vue.extend({
         "特殊召唤",
         "协调",
         "反转",
-        "卡通",
         "灵魂",
-        "联合",
-        "二重",
         "灵摆",
         "连接",
         "仪式",
@@ -336,26 +347,32 @@ export default Vue.extend({
         "同步",
         "超量",
       ],
+      linkDirections: [
+        { value: '7' }, { value: '8' }, { value: '9' },
+        { value: '4' }, { value: '5' }, { value: '6' },
+        { value: '1' }, { value: '2' }, { value: '3' },
+      ],
     };
   },
   async onLoad() {
-    // this.getStatistics();
-    this.queryCards();
+    this.getStatistics();
+    // this.queryCards();
     this.initGame();
   },
   methods: {
-    async queryCards(keyword = '青眼') {
+    async queryCards(keyword = '') {
       try {
         const input: CardInput = {
           params: {
             page: 1,
             pageSize: 10,
             lang: 'cn',
-            keyword
+            keyword,
+
           },
         }
         const res: any = await service.getCard(input);
-        if (res.result.code === 200 && res.response.cardList && res.response.cardList.length > 0) {
+        if (res.result.code === 200 && res.response.cardList) {
           this.filteredPokemonList = res.response.cardList;
         }
       } catch (error) {
@@ -371,6 +388,7 @@ export default Vue.extend({
         const res: any = await service.getStatistics();
         if (res.code === 200) {
           let totalNum = res.response.total;
+          this.totalNum = totalNum;
           this.queryCardById(totalNum)
         }
       } catch (error) {
@@ -378,15 +396,29 @@ export default Vue.extend({
       } finally {
       }
     },
-    //用卡名查询
-    async queryCardById(max: number) {
+    //用id查询
+    async queryCardById(max: number, hasScreening = false) {
       try {
         //id从1-max随机取一个
         const id = Math.floor(Math.random() * max) + 1;
         const res: any = await service.getCardById(id);
         if (res.code === 200) {
-          if (res.response.card.id)
-            this.answer = res.response.card;
+          if (res.response.card.id) {
+            if (hasScreening) {
+              if (this.selectedCardType === '怪兽') {
+                if (res.response.card.attributeName !== '魔法' && res.response.card.attributeName !== '陷阱') {
+                  if (this.selectedMonsterType === '全部') { this.answer = res.response.card; }
+                  else if (res.response.card.otherItemNameList.includes(this.selectedMonsterType)) { this.answer = res.response.card; }
+                  else this.queryCardById(max, hasScreening);
+                }
+                else this.queryCardById(max, hasScreening);
+              } else if (this.selectedCardType === res.response.card.attributeName) { this.answer = res.response.card; }
+              else this.queryCardById(max, hasScreening);
+              this.showSettingsModal = false;//关闭设置弹窗
+            }
+            else this.answer = res.response.card;
+          }
+
           else {
             this.callbackIndex++
             if (this.callbackIndex < 6) {
@@ -398,17 +430,14 @@ export default Vue.extend({
             })
           }
         }
-
-        // if (res.result.code === 200 && res.response.cardList && res.response.cardList.length > 0) {
-        //   this.filteredPokemonList = res.response.cardList;
-        // }
       } catch (error) {
         console.error('查询卡片失败:', error);
       } finally {
       }
     },
-    initGame() {
-      this.answer = getRandomPokemon();
+    initGame(isTrue = false) {
+      if (isTrue) this.queryCardById(this.totalNum, true);
+      this.selected = false;
       this.guessRecords = [];
       this.remainingAttempts = this.maxAttempts;
       this.guessInput = "";
@@ -416,7 +445,7 @@ export default Vue.extend({
       this.showFailModal = false;
       this.showSuggestions = false;
       this.filteredPokemonList = [];
-      console.log("答案是：", this.answer.name);
+      // console.log("答案是：", this.answer.cardName);
     },
     //卡片类型
     switchCardType(type: string) {
@@ -431,6 +460,7 @@ export default Vue.extend({
     },
     // 处理搜索输入变化
     handleSearchChange(value: string) {
+      if (this.selected) return
       if (this.lock) return;
       if (!value || value.trim() === "") {
         this.showSuggestions = false;
@@ -450,6 +480,7 @@ export default Vue.extend({
 
     // 选择建议的游戏王卡片
     selectPokemon(cardInfo: Pokemon) {
+      this.selected = true;
       this.guessInput = cardInfo.cardName;
       this.currentCard = cardInfo;
       this.showSuggestions = false;
@@ -485,7 +516,7 @@ export default Vue.extend({
 
       // 错误的情况，添加到猜测记录并减少次数
       const matches = this.compareAttributes(this.currentCard, this.answer);
-      this.guessRecords.push({
+      this.guessRecords.unshift({
         cardInfo: this.currentCard,
         matches: matches
       });
@@ -494,7 +525,7 @@ export default Vue.extend({
       this.guessInput = "";
       this.currentCard = {};
       this.showSuggestions = false;
-
+      this.selected = false;
       // 检查是否用完次数
       if (this.remainingAttempts <= 0) {
         setTimeout(() => {
@@ -506,13 +537,13 @@ export default Vue.extend({
     compareAttributes(guess: Pokemon, answer: Pokemon) {
       return {
         attributeName: this.compareExact(guess.attributeName, answer.attributeName),
-        speciesName: this.compareArray(guess.speciesName, answer.speciesName),
+        speciesName: this.compareExact(guess.speciesName, answer.speciesName),
         starchip: this.compareStarchip(guess.starchip, answer.starchip),
         atk: this.compareNumber(guess.atk, answer.atk, 500),
         def: this.compareNumber(guess.def, answer.def, 500),
         otherItemNameList: this.compareArray(guess.otherItemNameList, answer.otherItemNameList),
         penScale: this.compareExact(guess.penScale, answer.penScale),
-        linkMarkerCount: this.compareExact(guess.linkMarkerCount, answer.linkMarkerCount),
+        linkMarkerCount: this.compareStarchip(guess.linkMarkerCount, answer.linkMarkerCount),
       };
     },
 
@@ -527,22 +558,25 @@ export default Vue.extend({
     compareArray(guessArray: any[], answerArray: any[]): MatchType {
       if (!guessArray || !answerArray) return "none";
       if (guessArray.length === 0 || answerArray.length === 0) return "none";
-      console.log(guessArray, '---');
-      let hasExactMatch = false;
-      let isExactSame = false;
-      if (typeof (guessArray) == 'string') hasExactMatch = answerArray === guessArray
-      else {
-        hasExactMatch = guessArray.some((item) =>
-          answerArray.includes(item)
-        );
-        isExactSame =
-          guessArray.length === answerArray.length &&
-          guessArray.every((item) => answerArray.includes(item));
+
+      // 处理字符串情况
+      if (typeof guessArray === 'string') {
+        return guessArray === answerArray ? "exact" : "none";
       }
 
+      // 检查是否完全匹配
+      const isExactSame =
+        guessArray.length === answerArray.length &&
+        guessArray.every(item => answerArray.includes(item)) &&
+        answerArray.every(item => guessArray.includes(item));
 
       if (isExactSame) return "exact";
-      if (hasExactMatch) return "partial";
+
+      // 检查是否有部分匹配
+      const hasPartialMatch = guessArray.some(item => answerArray.includes(item));
+
+      if (hasPartialMatch) return "partial";
+
       return "none";
     },
 
@@ -591,15 +625,7 @@ export default Vue.extend({
     },
 
     playAgain() {
-      this.initGame();
-    },
-
-    startDailyChallenge() {
-      this.initGame();
-      uni.showToast({
-        title: "每日挑战已开始",
-        icon: "success",
-      });
+      this.initGame(true);
     },
 
     showStats() {
@@ -630,19 +656,23 @@ export default Vue.extend({
         },
       });
     },
-
+    reloadGame() {
+      this.selectedCardType = '怪兽';
+      this.selectedMonsterType = '全部'
+      this.initGame();
+      this.queryCardById(this.totalNum)
+    },
     showSettings() {
       this.showSettingsModal = true;
     },
 
     saveSettings() {
       // 保存设置并重新初始化游戏
-      this.showSettingsModal = false;
-      this.initGame();
-      uni.showToast({
-        title: "设置已保存",
-        icon: "success",
-      });
+      this.hasScreening = true;
+      // uni.showLoading({
+      //   title: '初始化中...',
+      // })
+      this.initGame(true);
     },
 
     shareResult() {
@@ -916,51 +946,94 @@ page {
         }
 
         .right {
-          font-size: 28rpx;
-          margin-left: 20rpx;
-        }
-      }
-    }
-
-    .cardInfo-details {
-      .detail-row {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 15rpx;
-        flex-wrap: wrap;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        .detail-label {
-          font-size: 26rpx;
-          color: #666;
-          min-width: 110rpx;
-          line-height: 50rpx;
-          font-weight: 500;
-        }
-
-        .tags-group {
           flex: 1;
+          margin-left: 20rpx;
           display: flex;
-          flex-wrap: wrap;
-          gap: 10rpx;
-        }
-
-        .atk-def-container {
-          display: flex;
-          align-items: center;
+          flex-direction: column;
           gap: 10rpx;
 
-          .arrow-indicator {
-            font-size: 32rpx;
-            font-weight: bold;
-            color: #667eea;
+          .compare-item {
+            display: flex;
+            align-items: center;
+            font-size: 26rpx;
+            gap: 10rpx;
+
+            .compare-label {
+              color: #666;
+              font-weight: 500;
+              min-width: 80rpx;
+            }
+
+            .compare-value {
+              flex: 1;
+              padding: 8rpx 16rpx;
+              border-radius: 8rpx;
+              font-weight: 500;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              transition: all 0.3s ease;
+
+              .arrow-indicator {
+                font-size: 28rpx;
+                font-weight: bold;
+                margin-left: 8rpx;
+              }
+
+              // 完全匹配 - 绿底
+              &.match-exact {
+                background: #52c41a;
+                color: #fff;
+              }
+
+              // 部分匹配/相近 - 橙底
+              &.match-partial {
+                background: #fa8c16;
+                color: #fff;
+              }
+
+              // 不匹配 - 灰底
+              &.match-none {
+                background: #d9d9d9;
+                color: #595959;
+              }
+
+              .direction-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 60rpx);
+                grid-template-rows: repeat(3, 60rpx);
+                gap: 8rpx;
+                background: #8b7355;
+                padding: 16rpx;
+                border-radius: 16rpx;
+              }
+
+              .direction-btn {
+                background: #f0f0f0;
+                border: 3rpx solid #666666;
+                border-radius: 8rpx;
+                transition: all 0.3s;
+
+                &.center {
+                  background: #8b7355;
+                  border-color: #8b7355;
+                }
+
+                &.selected {
+                  background: #003366;
+                  border-color: #003366;
+                }
+
+                &:active:not(.center) {
+                  transform: scale(0.95);
+                }
+              }
+            }
           }
         }
       }
     }
+
   }
 }
 
